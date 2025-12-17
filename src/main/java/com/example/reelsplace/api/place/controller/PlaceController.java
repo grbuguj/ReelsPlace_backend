@@ -2,6 +2,7 @@ package com.example.reelsplace.api.place.controller;
 
 import com.example.reelsplace.api.place.dto.PlaceResponse;
 import com.example.reelsplace.api.place.service.PlaceService;
+import com.example.reelsplace.global.annotation.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +28,7 @@ public class PlaceController {
      */
     @GetMapping
     public ResponseEntity<Page<PlaceResponse>> getMyPlaces(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthUser Long userId,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<PlaceResponse> response = placeService.getMyPlaces(userId, pageable);
@@ -40,7 +41,7 @@ public class PlaceController {
      */
     @DeleteMapping("/{placeId}")
     public ResponseEntity<Void> deletePlace(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthUser Long userId,
             @PathVariable Long placeId
     ) {
         placeService.deletePlace(userId, placeId);
@@ -53,7 +54,7 @@ public class PlaceController {
      */
     @PostMapping("/{placeId}/open-map")
     public ResponseEntity<Void> recordMapOpen(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthUser Long userId,
             @PathVariable Long placeId
     ) {
         placeService.recordMapOpen(userId, placeId);

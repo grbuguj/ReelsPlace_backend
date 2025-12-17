@@ -3,6 +3,7 @@ package com.example.reelsplace.api.reel.controller;
 import com.example.reelsplace.api.reel.dto.ReelResponse;
 import com.example.reelsplace.api.reel.dto.ReelSaveRequest;
 import com.example.reelsplace.api.reel.service.ReelService;
+import com.example.reelsplace.global.annotation.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,8 +31,7 @@ public class ReelController {
      */
     @PostMapping
     public ResponseEntity<ReelResponse> saveReel(
-            // TODO: 인증 구현 후 @AuthUser Long userId로 변경
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthUser Long userId,
             @Valid @RequestBody ReelSaveRequest request
     ) {
         ReelResponse response = reelService.saveReel(userId, request);
@@ -44,7 +44,7 @@ public class ReelController {
      */
     @GetMapping
     public ResponseEntity<Page<ReelResponse>> getMyReels(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthUser Long userId,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<ReelResponse> response = reelService.getMyReels(userId, pageable);
@@ -57,7 +57,7 @@ public class ReelController {
      */
     @DeleteMapping("/{reelId}")
     public ResponseEntity<Void> deleteReel(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthUser Long userId,
             @PathVariable Long reelId
     ) {
         reelService.deleteReel(userId, reelId);

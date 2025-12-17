@@ -26,6 +26,7 @@ public class ReelService {
 
     private final ReelRepository reelRepository;
     private final UserRepository userRepository;
+    private final ReelProcessingService reelProcessingService;
 
     /**
      * 릴스 저장
@@ -53,7 +54,9 @@ public class ReelService {
 
         Reel savedReel = reelRepository.save(reel);
         
-        // TODO: 비동기로 파싱 작업 트리거 필요
+        // 5. 비동기 처리 트리거
+        reelProcessingService.processReelAsync(savedReel.getId(), userId);
+        
         log.info("릴스 저장 완료 - reelId: {}, status: PROCESSING", savedReel.getId());
 
         return ReelResponse.from(savedReel);

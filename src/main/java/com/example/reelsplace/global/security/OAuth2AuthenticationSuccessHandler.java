@@ -33,6 +33,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String accessToken = jwtTokenProvider.createAccessToken(userId);
         String refreshToken = jwtTokenProvider.createRefreshToken(userId);
 
+
         log.info("OAuth2 인증 성공 - userId: {}", userId);
 
         // User-Agent로 모바일/웹 구분

@@ -103,71 +103,100 @@ public class InternalReelService {
                 .orElseThrow(() -> new CustomException(ErrorCode.REEL_NOT_FOUND));
 
         List<CreatePlacesResponse.CreatedPlace> createdPlaces = new ArrayList<>();
-        List<String> failedAddresses = new ArrayList<>();
+        List<String> failedTargets = new ArrayList<>();
+
+        // 🔑 캡션에서 매장명 추출 (없으면 null)
+        String placeName = addressExtractionService
+                .extractPlaceName(reel.getCaption())
+                .orElse(null);
 
         // 각 주소로 Google Places 검색
         for (String address : request.getAddresses()) {
             try {
-                // Google Places로 장소 검색
-                Place place = googlePlacesService.searchPlace(reel.getUser(), address);
+                Place place = googlePlacesService.searchPlace(
+                        reel.getUser(),
+                        placeName,
+                        address
+                );
 
                 if (place == null) {
-                    failedAddresses.add(address);
                     continue;
                 }
 
-                // 중복 체크
+                // 🔁 중복 장소 체크
+                Place savedPlace;
                 if (placeRepository.existsByUserIdAndGooglePlaceId(
-                        reel.getUser().getId(), place.getGooglePlaceId())) {
-                    // 이미 존재하는 장소 가져오기
-                    place = placeRepository.findByUserIdAndGooglePlaceId(
-                            reel.getUser().getId(), place.getGooglePlaceId()).get();
+                        reel.getUser().getId(),
+                        place.getGooglePlaceId())) {
+
+                    savedPlace = placeRepository
+                            .findByUserIdAndGooglePlaceId(
+                                    reel.getUser().getId(),
+                                    place.getGooglePlaceId())
+                            .orElseThrow(); // 논리상 존재 보장
+
                 } else {
-                    // 새 장소 저장
-                    place = placeRepository.save(place);
+                    savedPlace = placeRepository.save(place);
                 }
 
-                // ReelPlace 매핑 생성
+                // Reel ↔ Place 매핑
                 ReelPlace reelPlace = ReelPlace.builder()
                         .reel(reel)
-                        .place(place)
+                        .place(savedPlace)
                         .build();
                 reelPlaceRepository.save(reelPlace);
 
-                // 응답 데이터 추가
-                createdPlaces.add(CreatePlacesResponse.CreatedPlace.builder()
-                        .placeId(place.getId())
-                        .googlePlaceId(place.getGooglePlaceId())
-                        .name(place.getName())
-                        .address(place.getAddress())
-                        .imageCount(place.getImages().size())
-                        .build());
+                // 응답 DTO
+                createdPlaces.add(
+                        CreatePlacesResponse.CreatedPlace.builder()
+                                .placeId(savedPlace.getId())
+                                .googlePlaceId(savedPlace.getGooglePlaceId())
+                                .name(savedPlace.getName())
+                                .address(savedPlace.getAddress())
+                                .imageCount(savedPlace.getImages().size())
+                                .build()
+                );
 
             } catch (Exception e) {
-                log.error("장소 생성 실패 - 주소: {}, Error: {}", address, e.getMessage());
-                failedAddresses.add(address);
+                log.error(
+                        "장소 생성 실패 - reelId: {}, placeName: {}, address: {}, error: {}",
+                        reelId, placeName, address, e.getMessage()
+                );
             }
         }
 
-        // 릴스 상태 업데이트
-        if (!createdPlaces.isEmpty()) {
-            reel.updateStatus(ReelStatus.PLACE_FOUND);
-        } else if (request.getAddresses().isEmpty()) {
-            reel.updateStatus(ReelStatus.NO_ADDRESS);
-        } else {
-            reel.updateStatus(ReelStatus.PLACE_NOT_FOUND);
-        }
 
-        log.info("장소 생성 완료 - reelId: {}, 성공: {}, 실패: {}",
-                reelId, createdPlaces.size(), failedAddresses.size());
+
+        // 🎯 릴스 상태 업데이트
+        updateReelStatus(reel, request.getAddresses(), createdPlaces);
+
+        log.info(
+                "장소 생성 완료 - reelId: {}, 성공: {}, 실패: {}",
+                reelId, createdPlaces.size(), failedTargets.size()
+        );
 
         return CreatePlacesResponse.builder()
                 .reelId(reelId)
                 .createdPlaces(createdPlaces)
-                .failedAddresses(failedAddresses)
+                .failedAddresses(failedTargets)
                 .createdAt(LocalDateTime.now())
                 .build();
     }
+
+    private void updateReelStatus(
+            Reel reel,
+            List<String> addresses,
+            List<CreatePlacesResponse.CreatedPlace> createdPlaces
+    ) {
+        if (!createdPlaces.isEmpty()) {
+            reel.updateStatus(ReelStatus.PLACE_FOUND);
+        } else if (addresses.isEmpty()) {
+            reel.updateStatus(ReelStatus.NO_ADDRESS);
+        } else {
+            reel.updateStatus(ReelStatus.PLACE_NOT_FOUND);
+        }
+    }
+
 
     /**
      * 릴스 상태 변경 (디버깅용)

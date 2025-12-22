@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주소 추출 & 장소 생성 테스트</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .mock-caption-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #28a745;
+        }
+
+        .result-item.error {
+            border-left-color: #dc3545;
+        }
+
+        .result-item h4 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .result-item p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .log-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .log-line {
+            margin-bottom: 5px;
+        }
+
+        .log-info { color: #4ec9b0; }
+        .log-warn { color: #dcdcaa; }
+        .log-error { color: #f48771; }
+        .log-success { color: #b5cea8; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .caption-templates {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .template-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .template-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .template-card h4 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .template-card p {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🧪 주소 추출 & 장소 생성 테스트</h1>
+            <p>Mock 캡션으로 주소 추출 → 장소 생성 전체 플로우 테스트</p>
+        </div>
+
+        <!-- Mock 캡션 선택 -->
+        <div class="test-section">
+            <div class="section-title">
+                <span class="step-badge">STEP 0</span>
+                Mock 캡션 선택
+            </div>
+
+            <div class="caption-templates" id="captionTemplates">
+                <div class="template-card" onclick="selectCaption('template1')">
+                    <h4>📍 연남동 피자집</h4>
+                    <p>주소: 서울특별시 마포구 연남동 239-10</p>
+                </div>
+                <div class="template-card" onclick="selectCaption('template2')">
+                    <h4>🍔 강남 햄버거집</h4>
+                    <p>위치: 서울 강남구 역삼동 123-45</p>
+                </div>
+                <div class="template-card" onclick="selectCaption('template3')">
+                    <h4>☕ 홍대 카페</h4>
+                    <p>📍 서울특별시 마포구 서교동 369-11</p>
+                </div>
+                <div class="template-card" onclick="selectCaption('template4')">
+                    <h4>🍜 데이트 코스 (복수 주소)</h4>
+                    <p>1차: 강남구, 2차: 송파구</p>
+                </div>
+                <div class="template-card" onclick="selectCaption('template5')">
+                    <h4>❌ 주소 없음</h4>
+                    <p>주소 정보가 없는 캡션</p>
+                </div>
+            </div>
+
+            <div class="mock-caption-box" id="mockCaption"></div>
+        </div>
+
+        <!-- STEP 1: 주소 추출 -->
+        <div class="test-section">
+            <div class="section-title">
+                <span class="step-badge">STEP 1</span>
+                주소 추출 테스트
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="extractAddresses()">
+                    🔍 주소 추출 실행
+                </button>
+                <button class="btn btn-secondary" onclick="clearStep1()">
+                    🗑️ 초기화
+                </button>
+            </div>
+
+            <div class="loading" id="loading1">
+                <div class="spinner"></div>
+                <p>주소 추출 중...</p>
+            </div>
+
+            <div id="step1Result"></div>
+        </div>
+
+        <!-- STEP 2: 장소 생성 -->
+        <div class="test-section">
+            <div class="section-title">
+                <span class="step-badge">STEP 2</span>
+                장소 생성 테스트 (Google Places API)
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-success" onclick="createPlaces()" id="createPlacesBtn" disabled>
+                    🏢 장소 생성 실행
+                </button>
+                <button class="btn btn-secondary" onclick="clearStep2()">
+                    🗑️ 초기화
+                </button>
+            </div>
+
+            <div class="loading" id="loading2">
+                <div class="spinner"></div>
+                <p>Google Places API 호출 중...</p>
+            </div>
+
+            <div id="step2Result"></div>
+        </div>
+
+        <!-- 통합 로그 -->
+        <div class="test-section">
+            <div class="section-title">
+                📋 실행 로그
+            </div>
+            <div class="log-box" id="logBox"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentReelId = null;
+        let extractedAddresses = [];
+
+        const captionTemplates = {
+            template1: `🍕 오늘의 맛집 탐방 🍕
+
+진짜 맛있는 피자 집 찾았어요!
+주소: 서울특별시 마포구 연남동 239-10
+
+📍 위치 정보
+- 지하철 2호선 홍대입구역 3번 출구
+- 도보 10분 거리
+
+💰 가격대: 1.5~2만원
+⭐ 별점: 4.8/5.0
+
+#연남동맛집 #피자맛집 #데이트코스
+#홍대맛집 #서울맛집 #먹스타그램`,
+
+            template2: `🍔 강남 핫플 발견!
+
+진짜 맛있는 수제버거집
+위치: 서울 강남구 역삼동 123-45
+
+🔥 특징
+- 수제 패티 사용
+- 인스타 감성 인테리어
+- 주차 가능
+
+💰 가격: 12,000원~
+⏰ 영업시간: 11:00~22:00
+
+#강남맛집 #수제버거 #햄버거맛집`,
+
+            template3: `☕ 홍대 숨은 카페 추천
+
+분위기 완전 좋아요!
+📍 서울특별시 마포구 서교동 369-11
+
+✨ 특징
+- 루프탑 있음
+- 조용한 분위기
+- 디저트 맛있음
+
+💰 아메리카노: 4,500원
+📸 사진 찍기 좋아요!
+
+#홍대카페 #카페추천 #데이트코스`,
+
+            template4: `💑 오늘의 데이트 코스!
+
+1차: 서울 강남구 압구정로 123
+(이탈리안 레스토랑)
+
+2차: 📍 서울특별시 송파구 잠실동 456-78
+(루프탑 카페)
+
+둘 다 분위기 좋고 강추!!
+완벽한 하루였어요 💕
+
+#데이트코스 #서울데이트 #커플`,
+
+            template5: `오늘 날씨 너무 좋다!
+
+친구들이랑 놀러갔다왔어요 😊
+너무 재밌었어 ㅎㅎ
+
+다음에 또 가고싶다!
+
+#일상 #데일리 #좋아요 #맞팔`
+        };
+
+        // 초기 캡션 로드
+        selectCaption('template1');
+
+        function selectCaption(template) {
+            const caption = captionTemplates[template];
+            document.getElementById('mockCaption').textContent = caption;
+            addLog('info', `Mock 캡션 선택: ${template}`);
+
+            // 템플릿 카드 하이라이트
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.style.borderColor = 'transparent';
+            });
+            event.target.closest('.template-card').style.borderColor = '#667eea';
+        }
+
+        async function extractAddresses() {
+            const caption = document.getElementById('mockCaption').textContent;
+
+            if (!caption.trim()) {
+                alert('Mock 캡션을 선택해주세요!');
+                return;
+            }
+
+            // 먼저 릴스 생성 필요
+            if (!currentReelId) {
+                await createTestReel(caption);
+            }
+
+            document.getElementById('loading1').classList.add('active');
+            addLog('info', 'STEP 1 시작: 주소 추출');
+
+            try {
+                const response = await fetch(`/api/v1/internal/reels/${currentReelId}/extract-addresses`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('주소 추출 실패');
+
+                const data = await response.json();
+                extractedAddresses = data.addresses;
+
+                addLog('success', `✅ 주소 ${data.addresses.length}개 추출 완료`);
+                data.addresses.forEach(addr => {
+                    addLog('info', `  - ${addr}`);
+                });
+
+                displayStep1Result(data);
+                document.getElementById('createPlacesBtn').disabled = extractedAddresses.length === 0;
+
+            } catch (error) {
+                addLog('error', `❌ 주소 추출 실패: ${error.message}`);
+                displayError('step1Result', error.message);
+            } finally {
+                document.getElementById('loading1').classList.remove('active');
+            }
+        }
+
+        async function createTestReel(caption) {
+            addLog('info', '테스트 릴스 생성 중...');
+
+            try {
+                // 실제 릴스 생성 API 호출
+                const response = await fetch('/api/v1/reels', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // 테스트용 임시 인증 (실제로는 로그인된 사용자 ID 필요)
+                        'X-User-Id': '1' // 임시로 하드코딩
+                    },
+                    body: JSON.stringify({
+                        reelUrl: 'https://www.instagram.com/reel/test' + Date.now(),
+                        thumbnailUrl: 'https://via.placeholder.com/400x400',
+                        caption: caption
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('릴스 생성 실패: ' + response.status);
+                }
+
+                const data = await response.json();
+                currentReelId = data.reelId;
+
+                addLog('success', `✅ 테스트 릴스 생성 완료 (ID: ${currentReelId})`);
+                addLog('info', `   - URL: ${data.reelUrl}`);
+                addLog('info', `   - 상태: ${data.status}`);
+
+            } catch (error) {
+                addLog('error', `❌ 테스트 릴스 생성 실패: ${error.message}`);
+                throw error;
+            }
+        }
+
+        async function createPlaces() {
+            if (extractedAddresses.length === 0) {
+                alert('먼저 주소를 추출해주세요!');
+                return;
+            }
+
+            document.getElementById('loading2').classList.add('active');
+            addLog('info', 'STEP 2 시작: 장소 생성');
+
+            try {
+                const response = await fetch(`/api/v1/internal/reels/${currentReelId}/create-places`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        addresses: extractedAddresses
+                    })
+                });
+
+                if (!response.ok) throw new Error('장소 생성 실패');
+
+                const data = await response.json();
+
+                addLog('success', `✅ 장소 ${data.createdPlaces.length}개 생성 완료`);
+                data.createdPlaces.forEach(place => {
+                    addLog('info', `  📍 ${place.name}`);
+                    addLog('info', `     - 주소: ${place.address}`);
+                    addLog('info', `     - 이미지: ${place.imageCount}장`);
+                });
+
+                if (data.failedAddresses.length > 0) {
+                    addLog('warn', `⚠️ 실패한 주소 ${data.failedAddresses.length}개`);
+                    data.failedAddresses.forEach(addr => {
+                        addLog('warn', `  - ${addr}`);
+                    });
+                }
+
+                displayStep2Result(data);
+
+            } catch (error) {
+                addLog('error', `❌ 장소 생성 실패: ${error.message}`);
+                displayError('step2Result', error.message);
+            } finally {
+                document.getElementById('loading2').classList.remove('active');
+            }
+        }
+
+        function displayStep1Result(data) {
+            const html = `
+                <div class="result-box">
+                    <h3>추출 결과</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">${data.addresses.length}</div>
+                            <div class="stat-label">추출된 주소</div>
+                        </div>
+                    </div>
+                    ${data.addresses.map(addr => `
+                        <div class="result-item">
+                            <h4>📍 ${addr}</h4>
+                        </div>
+                    `).join('')}
+                    ${data.addresses.length === 0 ? `
+                        <div class="result-item error">
+                            <h4>❌ 추출된 주소 없음</h4>
+                            <p>캡션에 주소 정보가 없습니다.</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('step1Result').innerHTML = html;
+        }
+
+        function displayStep2Result(data) {
+            const html = `
+                <div class="result-box">
+                    <h3>장소 생성 결과</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">${data.createdPlaces.length}</div>
+                            <div class="stat-label">생성 성공</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${data.failedAddresses.length}</div>
+                            <div class="stat-label">생성 실패</div>
+                        </div>
+                    </div>
+                    ${data.createdPlaces.map(place => `
+                        <div class="result-item">
+                            <h4>📍 ${place.name}</h4>
+                            <p><strong>주소:</strong> ${place.address}</p>
+                            <p><strong>Google Place ID:</strong> ${place.googlePlaceId}</p>
+                            <p><strong>이미지:</strong> ${place.imageCount}장</p>
+                        </div>
+                    `).join('')}
+                    ${data.failedAddresses.map(addr => `
+                        <div class="result-item error">
+                            <h4>❌ 생성 실패</h4>
+                            <p>${addr}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('step2Result').innerHTML = html;
+        }
+
+        function displayError(elementId, message) {
+            const html = `
+                <div class="result-box">
+                    <div class="result-item error">
+                        <h4>❌ 오류 발생</h4>
+                        <p>${message}</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById(elementId).innerHTML = html;
+        }
+
+        function addLog(type, message) {
+            const logBox = document.getElementById('logBox');
+            const timestamp = new Date().toLocaleTimeString();
+            const logLine = document.createElement('div');
+            logLine.className = `log-line log-${type}`;
+            logLine.textContent = `[${timestamp}] ${message}`;
+            logBox.appendChild(logLine);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function clearStep1() {
+            document.getElementById('step1Result').innerHTML = '';
+            extractedAddresses = [];
+            document.getElementById('createPlacesBtn').disabled = true;
+            addLog('info', 'STEP 1 초기화');
+        }
+
+        function clearStep2() {
+            document.getElementById('step2Result').innerHTML = '';
+            addLog('info', 'STEP 2 초기화');
+        }
+
+        // 페이지 로드 시
+        addLog('success', '테스트 페이지 준비 완료! 🚀');
+        addLog('info', 'Mock 캡션을 선택하고 테스트를 시작하세요.');
+    </script>
+</body>
+</html>

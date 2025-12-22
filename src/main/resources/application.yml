@@ -76,8 +76,14 @@ jwt:
 # Google Places API 설정
 google:
   places:
-    api-key: your_google_places_api_key
+    api-key: ${GOOGLE_PLACES_API_KEY}
     base-url: https://maps.googleapis.com/maps/api/place
+
+# Instagram Meta Graph API 설정
+instagram:
+  facebook:
+    app-id: ${INSTAGRAM_APP_ID}
+    app-secret: ${INSTAGRAM_APP_SECRET}
 
 logging:
   level:

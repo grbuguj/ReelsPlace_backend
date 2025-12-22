@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Reels Test</title>
+    <style>
+        body { font-family: system-ui; padding: 40px; }
+        button { padding: 10px 16px; margin-top: 10px; }
+        pre { background:#111; color:#0f0; padding:15px; }
+    </style>
+</head>
+<body>
+
+<h2>🎬 Reels Test</h2>
+
+<button onclick="login()">Google Login</button>
+
+<hr>
+
+<input id="reelUrl" style="width:400px"
+       value="https://www.instagram.com/reel/test123" />
+<br>
+<button onclick="createReel()">릴스 생성</button>
+
+<h3>Current reelId</h3>
+<pre id="reelIdBox">없음</pre>
+
+<script>
+    let accessToken = localStorage.getItem("accessToken");
+    let currentReelId = null;
+
+    function login() {
+        location.href = "/oauth2/authorization/google";
+    }
+
+    async function createReel() {
+        const res = await fetch("/api/v1/reels", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+                reelUrl: document.getElementById("reelUrl").value
+            })
+        });
+
+        const data = await res.json();
+        currentReelId = data.reelId;
+
+        localStorage.setItem("testReelId", currentReelId);
+        document.getElementById("reelIdBox").textContent = currentReelId;
+    }
+</script>
+</body>
+</html>

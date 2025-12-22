@@ -24,8 +24,10 @@ public class PlaceImage {
     @JoinColumn(name = "place_id", nullable = false)
     private Place place;
 
-    @Column(name = "image_url", nullable = false, length = 500)
+    @Lob
+    @Column(name = "image_url", nullable = false, columnDefinition = "LONGTEXT")
     private String imageUrl;
+
 
     @Column(name = "sort_order", nullable = false)
     private Integer sortOrder;

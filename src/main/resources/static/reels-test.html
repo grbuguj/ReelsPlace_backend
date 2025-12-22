@@ -1,56 +1,150 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>Reels Test</title>
+    <meta charset="UTF-8" />
+    <title>ReelsPlace - 저장된 장소</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-        body { font-family: system-ui; padding: 40px; }
-        button { padding: 10px 16px; margin-top: 10px; }
-        pre { background:#111; color:#0f0; padding:15px; }
+        body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:#f5f6f8; padding:20px; }
+        h1 { text-align:center; margin-bottom:24px; }
+        .actions { display:flex; justify-content:center; gap:10px; margin-bottom:20px; }
+        button { padding:10px 18px; border-radius:8px; border:none; background:#4f46e5; color:#fff; font-weight:600; cursor:pointer; }
+        button:hover { background:#4338ca; }
+        .grid { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:20px; }
+        .card { background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08); transition:transform .2s; }
+        .card:hover { transform:translateY(-4px); }
+        .card img { width:100%; height:180px; object-fit:cover; background:#eee; display:block; }
+        .card-body { padding:14px; }
+        .name { font-size:16px; font-weight:700; margin-bottom:6px; }
+        .meta { font-size:14px; color:#555; margin-bottom:6px; }
+        .address { font-size:13px; color:#777; line-height:1.4; }
+        .empty { text-align:center; color:#888; margin-top:40px; }
+        .error { text-align:center; color:#c0392b; margin-top:20px; white-space:pre-wrap; }
+        .loading { text-align:center; color:#666; margin-top:20px; }
     </style>
 </head>
+
 <body>
+<h1>📍 저장된 장소</h1>
 
-<h2>🎬 Reels Test</h2>
+<div class="actions">
+    <button id="btnReload">다시 불러오기</button>
+    <button id="btnClearToken" style="background:#e74c3c;">토큰 삭제</button>
+</div>
 
-<button onclick="login()">Google Login</button>
+<div id="loading" class="loading" style="display:none;">불러오는 중...</div>
+<div id="error" class="error" style="display:none;"></div>
 
-<hr>
+<div id="grid" class="grid"></div>
 
-<input id="reelUrl" style="width:400px"
-       value="https://www.instagram.com/reel/test123" />
-<br>
-<button onclick="createReel()">릴스 생성</button>
-
-<h3>Current reelId</h3>
-<pre id="reelIdBox">없음</pre>
+<div id="empty" class="empty" style="display:none;">
+    저장된 장소가 없습니다.
+</div>
 
 <script>
-    let accessToken = localStorage.getItem("accessToken");
-    let currentReelId = null;
+    function $(id) { return document.getElementById(id); }
 
-    function login() {
-        location.href = "/oauth2/authorization/google";
+    function show(el, on) { el.style.display = on ? "block" : "none"; }
+
+    function safeGetPlaces(json) {
+        // 네가 올린 응답 구조: { status:200, data:{ content:[...] ... } }
+        // 혹시 한번 더 감싸진 경우도 대비
+        return json?.data?.content
+            ?? json?.data?.data?.content
+            ?? json?.content
+            ?? [];
     }
 
-    async function createReel() {
-        const res = await fetch("/api/v1/reels", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${accessToken}`
-            },
-            body: JSON.stringify({
-                reelUrl: document.getElementById("reelUrl").value
-            })
+    async function loadPlaces() {
+        const accessToken = localStorage.getItem("accessToken");
+        console.log("accessToken:", accessToken);
+
+        $("grid").innerHTML = "";
+        show($("empty"), false);
+        show($("error"), false);
+        show($("loading"), true);
+
+        if (!accessToken) {
+            show($("loading"), false);
+            show($("error"), true);
+            $("error").textContent = "accessToken이 없습니다. 먼저 로그인 후 localStorage에 accessToken이 저장돼야 합니다.";
+            return;
+        }
+
+        try {
+            const res = await fetch("/api/v1/places", {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+
+            console.log("status:", res.status);
+
+            // 401/403 같은 경우 JSON이 아닐 수도 있어서 방어
+            const text = await res.text();
+            let json;
+            try { json = JSON.parse(text); }
+            catch (e) {
+                throw new Error("응답이 JSON이 아님:\n" + text);
+            }
+
+            console.log("response:", json);
+
+            const places = safeGetPlaces(json);
+            console.log("places extracted:", places, "isArray:", Array.isArray(places), "len:", places?.length);
+
+            renderPlaces(places);
+
+        } catch (err) {
+            show($("error"), true);
+            $("error").textContent = "불러오기 실패:\n" + (err?.message ?? err);
+        } finally {
+            show($("loading"), false);
+        }
+    }
+
+    function renderPlaces(places) {
+        const grid = $("grid");
+        const empty = $("empty");
+
+        grid.innerHTML = "";
+
+        if (!Array.isArray(places) || places.length === 0) {
+            show(empty, true);
+            return;
+        }
+
+        show(empty, false);
+
+        places.forEach(place => {
+            const imageUrl = (place.images && place.images.length > 0)
+                ? place.images[0]
+                : "https://via.placeholder.com/400x300?text=No+Image";
+
+            const card = document.createElement("div");
+            card.className = "card";
+
+            card.innerHTML = `
+          <img src="${imageUrl}" alt="${place.name ?? ""}" onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'"/>
+          <div class="card-body">
+            <div class="name">${place.name ?? "-"}</div>
+            <div class="meta">⭐ ${place.rating ?? "N/A"} · 리뷰 ${place.reviewCount ?? 0}개</div>
+            <div class="address">${place.address ?? "-"}</div>
+          </div>
+        `;
+
+            grid.appendChild(card);
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        $("btnReload").addEventListener("click", loadPlaces);
+        $("btnClearToken").addEventListener("click", () => {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            alert("토큰 삭제 완료");
         });
 
-        const data = await res.json();
-        currentReelId = data.reelId;
-
-        localStorage.setItem("testReelId", currentReelId);
-        document.getElementById("reelIdBox").textContent = currentReelId;
-    }
+        loadPlaces(); // 자동 로드
+    });
 </script>
 </body>
 </html>

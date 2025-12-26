@@ -40,6 +40,9 @@ public class Place {
     @Column(nullable = false, length = 500)
     private String address;
 
+    @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReelPlace> reelPlaces = new ArrayList<>();
+
     @Column(precision = 2, scale = 1)
     private BigDecimal rating;
 

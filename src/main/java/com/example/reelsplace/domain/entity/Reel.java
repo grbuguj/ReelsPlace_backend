@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 릴스 엔티티
@@ -28,6 +30,9 @@ public class Reel {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "reel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReelPlace> reelPlaces = new ArrayList<>();
 
     @Column(name = "reel_url", nullable = false, length = 500)
     private String reelUrl;

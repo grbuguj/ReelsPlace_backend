@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>릴스플레이스 API 전체 테스트</title>
+    <title>릴스플레이스 완전판 테스트</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -19,9 +19,44 @@
             border-radius: 16px;
             margin-bottom: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .header h1 { color: #333; margin-bottom: 10px; }
-        .header p { color: #666; }
+        .header-left h1 { color: #333; margin-bottom: 5px; }
+        .header-left p { color: #666; font-size: 14px; }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-info {
+            text-align: right;
+            padding-right: 15px;
+            border-right: 2px solid #eee;
+        }
+        .user-info .user-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .user-info .user-email {
+            font-size: 12px;
+            color: #666;
+        }
+        .login-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .login-status.logged-in {
+            background: #d4edda;
+            color: #155724;
+        }
+        .login-status.logged-out {
+            background: #f8d7da;
+            color: #721c24;
+        }
         .test-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -33,6 +68,10 @@
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .test-card.disabled {
+            opacity: 0.6;
+            pointer-events: none;
         }
         .test-card h3 {
             color: #333;
@@ -55,7 +94,7 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .btn:hover { transform: translateY(-2px); }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); }
         .btn-primary { background: #667eea; color: white; }
         .btn-success { background: #28a745; color: white; }
         .btn-danger { background: #dc3545; color: white; }
@@ -76,7 +115,7 @@
             color: #555;
             font-weight: 600;
         }
-        .input-group input {
+        .input-group input, .input-group select {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
@@ -160,7 +199,7 @@
         }
         .list-item-info { flex: 1; }
         .list-item-info strong { display: block; margin-bottom: 4px; }
-        .list-item-info small { color: #666; }
+        .list-item-info small { color: #666; display: block; }
         .list-item-actions { display: flex; gap: 5px; }
         .badge {
             display: inline-block;
@@ -174,23 +213,92 @@
         .badge-warning { background: #fff3cd; color: #856404; }
         .badge-danger { background: #f8d7da; color: #721c24; }
         .badge-info { background: #d1ecf1; color: #0c5460; }
+        .auth-required {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            color: #721c24;
+            font-size: 13px;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- Header -->
+    <!-- Header with Auth Status -->
     <div class="header">
-        <h1>🧪 릴스플레이스 API 전체 테스트</h1>
-        <p>실제 사용 흐름대로 모든 API를 테스트합니다</p>
+        <div class="header-left">
+            <h1>🧪 릴스플레이스 완전판 테스트</h1>
+            <p>로그인부터 전체 플로우까지 모든 API 테스트</p>
+        </div>
+        <div class="header-right">
+            <div class="user-info" id="userInfo" style="display: none;">
+                <div class="user-name" id="userName"></div>
+                <div class="user-email" id="userEmail"></div>
+            </div>
+            <div class="login-status logged-out" id="loginStatus">
+                🔒 로그인 필요
+            </div>
+        </div>
     </div>
 
     <!-- 테스트 그리드 -->
     <div class="test-grid">
+        <!-- 0. 로그인 -->
+        <div class="test-card" id="authCard">
+            <h3>🔐 0. 인증 (Auth)</h3>
+            <div class="flow-indicator">
+                💡 테스트용 간편 로그인
+            </div>
+
+            <div id="loginForm">
+                <div class="input-group">
+                    <label>Provider</label>
+                    <select id="provider">
+                        <option value="GOOGLE">Google</option>
+                        <option value="KAKAO">Kakao</option>
+                        <option value="NAVER">Naver</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Nickname</label>
+                    <input type="text" id="nickname" value="테스터" placeholder="닉네임">
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="email" value="test@example.com" placeholder="이메일">
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="login()">
+                        🔓 로그인
+                    </button>
+                    <button class="btn btn-warning" onclick="quickLogin()">
+                        ⚡ 빠른 로그인
+                    </button>
+                </div>
+            </div>
+
+            <div id="logoutForm" style="display: none;">
+                <div class="btn-group">
+                    <button class="btn btn-info" onclick="getMyInfo()">
+                        👤 내 정보 조회
+                    </button>
+                    <button class="btn btn-danger" onclick="logout()">
+                        🚪 로그아웃
+                    </button>
+                </div>
+            </div>
+
+            <div class="result-box" id="authResult"></div>
+        </div>
+
         <!-- 1. 릴스 저장 -->
-        <div class="test-card">
+        <div class="test-card" id="reelCard">
             <h3>📝 1. 릴스 저장</h3>
             <div class="flow-indicator">
-                💡 시작점: 인스타 URL 저장 → 자동 파싱 시작
+                💡 인스타 URL 저장 → 자동 파싱
             </div>
             <div class="input-group">
                 <label>Instagram Reel URL</label>
@@ -209,11 +317,11 @@
             <div class="result-box" id="saveReelResult"></div>
         </div>
 
-        <!-- 2. 내 릴스 목록 조회 -->
-        <div class="test-card">
-            <h3>📋 2. 내 릴스 목록 조회</h3>
+        <!-- 2. 내 릴스 목록 -->
+        <div class="test-card" id="reelListCard">
+            <h3>📋 2. 내 릴스 목록</h3>
             <div class="flow-indicator">
-                💡 저장된 릴스 확인 (페이징)
+                💡 저장된 릴스 확인
             </div>
             <div class="input-group">
                 <label>Page / Size</label>
@@ -230,11 +338,11 @@
             <div class="result-box" id="myReelsResult"></div>
         </div>
 
-        <!-- 3. 내 장소 목록 조회 -->
-        <div class="test-card">
-            <h3>📍 3. 내 장소 목록 조회</h3>
+        <!-- 3. 내 장소 목록 -->
+        <div class="test-card" id="placeListCard">
+            <h3>📍 3. 내 장소 목록</h3>
             <div class="flow-indicator">
-                💡 생성된 장소 확인 (페이징)
+                💡 생성된 장소 확인
             </div>
             <div class="input-group">
                 <label>Page / Size</label>
@@ -251,11 +359,11 @@
             <div class="result-box" id="myPlacesResult"></div>
         </div>
 
-        <!-- 4. 통계 조회 -->
-        <div class="test-card">
+        <!-- 4. 통계 -->
+        <div class="test-card" id="statsCard">
             <h3>📊 4. 마이페이지 통계</h3>
             <div class="flow-indicator">
-                💡 릴스/장소 개수, 지도 열기 횟수
+                💡 릴스/장소 개수, 지도 열기
             </div>
             <div class="btn-group">
                 <button class="btn btn-info" onclick="getStats()">
@@ -266,7 +374,7 @@
         </div>
 
         <!-- 5. 릴스 삭제 -->
-        <div class="test-card">
+        <div class="test-card" id="deleteCard">
             <h3>🗑️ 5. 릴스 삭제</h3>
             <div class="flow-indicator">
                 💡 릴스 삭제 (장소는 유지)
@@ -283,11 +391,11 @@
             <div class="result-box" id="deleteReelResult"></div>
         </div>
 
-        <!-- 6. Internal: 전체 플로우 테스트 -->
-        <div class="test-card">
-            <h3>🔄 6. 전체 플로우 테스트</h3>
+        <!-- 6. 전체 플로우 -->
+        <div class="test-card" id="flowCard">
+            <h3>🔄 6. 전체 플로우</h3>
             <div class="flow-indicator">
-                💡 릴스 저장 → 파싱 → 주소 추출 → 장소 생성
+                💡 릴스 저장 → 파싱 → 주소 → 장소
             </div>
             <div class="btn-group">
                 <button class="btn btn-success" onclick="runFullFlow()">
@@ -298,7 +406,7 @@
         </div>
     </div>
 
-    <!-- 통합 로그 -->
+    <!-- 로그 -->
     <div class="log-section">
         <h3>📋 실행 로그</h3>
         <div class="btn-group">
@@ -311,9 +419,8 @@
 </div>
 
 <script>
-    let currentReelId = null;
-    let myReels = [];
-    let myPlaces = [];
+    let accessToken = null;
+    let currentUser = null;
 
     const MOCK_CAPTION = `🍕 오늘의 맛집 탐방!
 
@@ -329,6 +436,7 @@
 
 #연남동맛집 #피자맛집`;
 
+    // 로그
     function log(type, msg) {
         const box = document.getElementById('logBox');
         const div = document.createElement('div');
@@ -349,6 +457,160 @@
         elem.style.background = isError ? '#f8d7da' : '#d4edda';
     }
 
+    // UI 업데이트
+    function updateLoginUI(loggedIn) {
+        const status = document.getElementById('loginStatus');
+        const userInfo = document.getElementById('userInfo');
+        const loginForm = document.getElementById('loginForm');
+        const logoutForm = document.getElementById('logoutForm');
+
+        // 로그인 상태에 따라 카드 활성화/비활성화
+        const protectedCards = ['reelCard', 'reelListCard', 'placeListCard',
+            'statsCard', 'deleteCard', 'flowCard'];
+
+        if (loggedIn) {
+            status.className = 'login-status logged-in';
+            status.textContent = '✅ 로그인됨';
+            userInfo.style.display = 'block';
+            loginForm.style.display = 'none';
+            logoutForm.style.display = 'block';
+
+            if (currentUser) {
+                document.getElementById('userName').textContent = currentUser.nickname || 'User';
+                document.getElementById('userEmail').textContent = currentUser.email || '';
+            }
+
+            protectedCards.forEach(id => {
+                document.getElementById(id).classList.remove('disabled');
+            });
+        } else {
+            status.className = 'login-status logged-out';
+            status.textContent = '🔒 로그인 필요';
+            userInfo.style.display = 'none';
+            loginForm.style.display = 'block';
+            logoutForm.style.display = 'none';
+
+            protectedCards.forEach(id => {
+                document.getElementById(id).classList.add('disabled');
+            });
+        }
+    }
+
+    // 0. 로그인
+    async function login() {
+        const provider = document.getElementById('provider').value;
+        const nickname = document.getElementById('nickname').value;
+        const email = document.getElementById('email').value;
+
+        if (!nickname) {
+            alert('닉네임을 입력하세요!');
+            return;
+        }
+
+        log('info', '로그인 시도...');
+
+        try {
+            const res = await fetch('/api/v1/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    provider,
+                    providerUserId: 'test_' + Date.now(),
+                    email,
+                    nickname,
+                    defaultMapApp: 'GOOGLE'
+                })
+            });
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+            accessToken = data.accessToken;
+            currentUser = data.user;
+
+            log('success', `✅ 로그인 성공! (${currentUser.nickname})`);
+            log('info', `   - Access Token: ${accessToken.substring(0, 20)}...`);
+
+            updateLoginUI(true);
+            showResult('authResult', data);
+
+        } catch (error) {
+            log('error', `❌ 로그인 실패: ${error.message}`);
+            showResult('authResult', { error: error.message }, true);
+        }
+    }
+
+    async function quickLogin() {
+        document.getElementById('nickname').value = '테스터';
+        document.getElementById('email').value = 'test@reelsplace.com';
+        await login();
+    }
+
+    async function logout() {
+        log('info', '로그아웃 시도...');
+
+        try {
+            const res = await fetch('/api/v1/auth/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+
+            accessToken = null;
+            currentUser = null;
+
+            log('success', '✅ 로그아웃 완료');
+            updateLoginUI(false);
+            showResult('authResult', data);
+
+        } catch (error) {
+            log('error', `❌ 로그아웃 실패: ${error.message}`);
+            showResult('authResult', { error: error.message }, true);
+        }
+    }
+
+    async function getMyInfo() {
+        log('info', '내 정보 조회...');
+
+        try {
+            const res = await fetch('/api/v1/users/me', {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+            currentUser = data;
+
+            log('success', '✅ 내 정보 조회 완료');
+            log('info', `   - ID: ${data.id}`);
+            log('info', `   - 닉네임: ${data.nickname}`);
+            log('info', `   - 이메일: ${data.email || 'N/A'}`);
+
+            showResult('authResult', data);
+            updateLoginUI(true);
+
+        } catch (error) {
+            log('error', `❌ 내 정보 조회 실패: ${error.message}`);
+            showResult('authResult', { error: error.message }, true);
+        }
+    }
+
+    // 헤더 생성 헬퍼
+    function getAuthHeaders() {
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+        };
+    }
+
     // 1. 릴스 저장
     async function saveReel() {
         const url = document.getElementById('reelUrl').value;
@@ -363,18 +625,15 @@
         try {
             const res = await fetch('/api/v1/reels', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ reelUrl: url })
             });
 
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             const data = await res.json();
-            currentReelId = data.reelId;
 
             log('success', `✅ 릴스 저장 완료 (ID: ${data.reelId})`);
-            log('info', `   - 상태: ${data.status}`);
-
             showResult('saveReelResult', data);
 
         } catch (error) {
@@ -383,7 +642,6 @@
         }
     }
 
-    // Mock 데이터로 릴스 저장 (테스트용)
     async function saveReelWithMockData() {
         log('info', 'Mock 데이터로 릴스 생성...');
 
@@ -401,17 +659,12 @@
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             const data = await res.json();
-            currentReelId = data.reelId;
 
-            log('success', `✅ Mock 릴스 생성 완료 (ID: ${data.reelId})`);
-
+            log('success', `✅ Mock 릴스 생성 (ID: ${data.reelId})`);
             showResult('saveReelResult', data);
 
-            // 2초 대기 후 자동으로 주소 추출
-            log('info', '⏳ 2초 후 자동으로 주소 추출 시작...');
-            setTimeout(async () => {
-                await extractAddresses(data.reelId);
-            }, 2000);
+            // 자동으로 주소 추출
+            setTimeout(() => extractAddresses(data.reelId), 2000);
 
         } catch (error) {
             log('error', `❌ Mock 릴스 생성 실패: ${error.message}`);
@@ -419,9 +672,8 @@
         }
     }
 
-    // 주소 추출 (Internal)
     async function extractAddresses(reelId) {
-        log('info', `주소 추출 시작... (Reel ID: ${reelId})`);
+        log('info', `주소 추출... (ID: ${reelId})`);
 
         try {
             const res = await fetch(`/api/v1/internal/reels/${reelId}/extract-addresses`, {
@@ -433,14 +685,9 @@
             const data = await res.json();
 
             log('success', `✅ 주소 ${data.addresses.length}개 추출`);
-            data.addresses.forEach(addr => log('info', `   - ${addr}`));
 
             if (data.addresses.length > 0) {
-                // 자동으로 장소 생성
-                log('info', '⏳ 장소 생성 시작...');
                 await createPlaces(reelId, data.addresses);
-            } else {
-                log('warn', '⚠️ 추출된 주소가 없습니다.');
             }
 
         } catch (error) {
@@ -448,8 +695,9 @@
         }
     }
 
-    // 장소 생성 (Internal)
     async function createPlaces(reelId, addresses) {
+        log('info', '장소 생성...');
+
         try {
             const res = await fetch(`/api/v1/internal/reels/${reelId}/create-places`, {
                 method: 'POST',
@@ -462,50 +710,37 @@
             const data = await res.json();
 
             log('success', `✅ 장소 ${data.createdPlaces.length}개 생성`);
-            data.createdPlaces.forEach(p => {
-                log('info', `   📍 ${p.name}`);
-            });
-
-            if (data.failedAddresses.length > 0) {
-                log('warn', `⚠️ 실패 ${data.failedAddresses.length}개`);
-            }
 
         } catch (error) {
             log('error', `❌ 장소 생성 실패: ${error.message}`);
         }
     }
 
-    // 2. 내 릴스 목록 조회
+    // 2. 릴스 목록
     async function getMyReels() {
         const page = document.getElementById('reelPage').value;
         const size = document.getElementById('reelSize').value;
 
-        log('info', `내 릴스 목록 조회... (page=${page}, size=${size})`);
+        log('info', `릴스 목록 조회... (page=${page}, size=${size})`);
 
         try {
-            const res = await fetch(`/api/v1/reels?page=${page}&size=${size}`);
+            const res = await fetch(`/api/v1/reels?page=${page}&size=${size}`, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
 
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             const data = await res.json();
-            myReels = data.content;
 
-            log('success', `✅ 릴스 ${data.content.length}개 조회 (총 ${data.totalElements}개)`);
+            log('success', `✅ 릴스 ${data.content.length}개 조회`);
 
-            // 리스트 형태로 표시
-            let html = `<div style="font-weight: bold; margin-bottom: 10px;">총 ${data.totalElements}개 릴스 (${data.totalPages} 페이지)</div>`;
-
+            let html = `<div style="font-weight: bold; margin-bottom: 10px;">총 ${data.totalElements}개</div>`;
             data.content.forEach(reel => {
-                const statusBadge = getStatusBadge(reel.status);
                 html += `
                 <div class="list-item">
                     <div class="list-item-info">
-                        <strong>ID: ${reel.reelId} ${statusBadge}</strong>
+                        <strong>ID: ${reel.reelId} ${getStatusBadge(reel.status)}</strong>
                         <small>${reel.reelUrl}</small>
-                    </div>
-                    <div class="list-item-actions">
-                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;"
-                                onclick="deleteReelById(${reel.reelId})">삭제</button>
                     </div>
                 </div>
             `;
@@ -514,38 +749,36 @@
             document.getElementById('myReelsResult').innerHTML = html;
 
         } catch (error) {
-            log('error', `❌ 릴스 목록 조회 실패: ${error.message}`);
+            log('error', `❌ 릴스 목록 실패: ${error.message}`);
             showResult('myReelsResult', { error: error.message }, true);
         }
     }
 
-    // 3. 내 장소 목록 조회
+    // 3. 장소 목록
     async function getMyPlaces() {
         const page = document.getElementById('placePage').value;
         const size = document.getElementById('placeSize').value;
 
-        log('info', `내 장소 목록 조회... (page=${page}, size=${size})`);
+        log('info', `장소 목록 조회... (page=${page}, size=${size})`);
 
         try {
-            const res = await fetch(`/api/v1/places?page=${page}&size=${size}`);
+            const res = await fetch(`/api/v1/places?page=${page}&size=${size}`, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
 
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             const data = await res.json();
-            myPlaces = data.content;
 
-            log('success', `✅ 장소 ${data.content.length}개 조회 (총 ${data.totalElements}개)`);
+            log('success', `✅ 장소 ${data.content.length}개 조회`);
 
-            // 리스트 형태로 표시
-            let html = `<div style="font-weight: bold; margin-bottom: 10px;">총 ${data.totalElements}개 장소 (${data.totalPages} 페이지)</div>`;
-
+            let html = `<div style="font-weight: bold; margin-bottom: 10px;">총 ${data.totalElements}개</div>`;
             data.content.forEach(place => {
                 html += `
                 <div class="list-item">
                     <div class="list-item-info">
                         <strong>📍 ${place.name}</strong>
                         <small>${place.address}</small>
-                        <small>⭐ ${place.rating || 'N/A'} (${place.reviewCount || 0}개 리뷰)</small>
                     </div>
                 </div>
             `;
@@ -554,28 +787,26 @@
             document.getElementById('myPlacesResult').innerHTML = html;
 
         } catch (error) {
-            log('error', `❌ 장소 목록 조회 실패: ${error.message}`);
+            log('error', `❌ 장소 목록 실패: ${error.message}`);
             showResult('myPlacesResult', { error: error.message }, true);
         }
     }
 
-    // 4. 통계 조회
+    // 4. 통계
     async function getStats() {
         log('info', '통계 조회...');
 
         try {
-            const res = await fetch('/api/v1/users/me/stats');
+            const res = await fetch('/api/v1/users/me/stats', {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
 
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             const data = await res.json();
 
             log('success', '✅ 통계 조회 완료');
-            log('info', `   - 릴스: ${data.reelCount}개`);
-            log('info', `   - 장소: ${data.placeCount}개`);
-            log('info', `   - 지도 열기: ${data.mapOpenCount}회`);
 
-            // 통계 카드 표시
             const html = `
             <div class="stats-grid">
                 <div class="stat-card">
@@ -597,7 +828,6 @@
 
         } catch (error) {
             log('error', `❌ 통계 조회 실패: ${error.message}`);
-            showResult('statsResult', { error: error.message }, true);
         }
     }
 
@@ -610,26 +840,20 @@
             return;
         }
 
-        await deleteReelById(reelId);
-    }
-
-    async function deleteReelById(reelId) {
-        if (!confirm(`릴스 ID ${reelId}를 삭제하시겠습니까?`)) return;
+        if (!confirm(`릴스 ${reelId} 삭제?`)) return;
 
         log('info', `릴스 삭제... (ID: ${reelId})`);
 
         try {
             const res = await fetch(`/api/v1/reels/${reelId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${accessToken}` }
             });
 
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-            log('success', `✅ 릴스 삭제 완료 (ID: ${reelId})`);
-            showResult('deleteReelResult', { message: '삭제 완료', reelId });
-
-            // 목록 새로고침
-            getMyReels();
+            log('success', `✅ 릴스 삭제 완료`);
+            showResult('deleteReelResult', { message: '삭제 완료' });
 
         } catch (error) {
             log('error', `❌ 릴스 삭제 실패: ${error.message}`);
@@ -637,12 +861,12 @@
         }
     }
 
-    // 6. 전체 플로우 테스트
+    // 6. 전체 플로우
     async function runFullFlow() {
         log('info', '========== 전체 플로우 시작 ==========');
 
         try {
-            // 1. Mock 릴스 생성
+            // Mock 릴스 생성
             log('info', 'STEP 1: Mock 릴스 생성...');
             const res1 = await fetch('/api/v1/test/reels', {
                 method: 'POST',
@@ -661,11 +885,9 @@
 
             log('success', `✅ 릴스 생성 (ID: ${reelId})`);
 
-            // 2초 대기
-            log('info', '⏳ 2초 대기...');
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(r => setTimeout(r, 2000));
 
-            // 2. 주소 추출
+            // 주소 추출
             log('info', 'STEP 2: 주소 추출...');
             const res2 = await fetch(`/api/v1/internal/reels/${reelId}/extract-addresses`, {
                 method: 'POST'
@@ -677,12 +899,11 @@
             log('success', `✅ 주소 ${addrData.addresses.length}개 추출`);
 
             if (addrData.addresses.length === 0) {
-                log('warn', '⚠️ 추출된 주소 없음');
-                showResult('fullFlowResult', { message: '주소 없음', reelId });
+                log('warn', '⚠️ 주소 없음');
                 return;
             }
 
-            // 3. 장소 생성
+            // 장소 생성
             log('info', 'STEP 3: 장소 생성...');
             const res3 = await fetch(`/api/v1/internal/reels/${reelId}/create-places`, {
                 method: 'POST',
@@ -695,16 +916,15 @@
             const placeData = await res3.json();
             log('success', `✅ 장소 ${placeData.createdPlaces.length}개 생성`);
 
-            // 4. 통계 조회
-            log('info', 'STEP 4: 통계 업데이트 확인...');
+            // 통계 확인
             await getStats();
 
             log('success', '========== 전체 플로우 완료! ==========');
 
             showResult('fullFlowResult', {
                 reelId,
-                addresses: addrData.addresses,
-                placesCreated: placeData.createdPlaces.length
+                addresses: addrData.addresses.length,
+                places: placeData.createdPlaces.length
             });
 
         } catch (error) {
@@ -713,7 +933,7 @@
         }
     }
 
-    // 유틸리티
+    // 유틸
     function getStatusBadge(status) {
         const badges = {
             'PROCESSING': '<span class="badge badge-info">처리중</span>',
@@ -726,10 +946,10 @@
         return badges[status] || `<span class="badge">${status}</span>`;
     }
 
-    // 페이지 로드 시
-    log('success', '✨ 릴스플레이스 API 테스트 페이지 준비 완료!');
-    log('info', 'Mock 데이터로 테스트하려면 "🧪 Mock 데이터로 저장" 버튼을 클릭하세요.');
-    log('info', '전체 플로우를 한번에 테스트하려면 "🚀 전체 플로우 실행" 버튼을 클릭하세요.\n');
+    // 초기화
+    updateLoginUI(false);
+    log('success', '✨ 릴스플레이스 완전판 테스트 준비 완료!');
+    log('info', '먼저 "⚡ 빠른 로그인"으로 로그인하세요!\n');
 </script>
 </body>
 </html>

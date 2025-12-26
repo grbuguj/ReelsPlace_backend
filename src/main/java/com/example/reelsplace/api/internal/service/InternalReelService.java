@@ -108,7 +108,17 @@ public class InternalReelService {
         // 🔑 캡션에서 매장명 추출 (없으면 null)
         String placeName = addressExtractionService
                 .extractPlaceName(reel.getCaption())
-                .orElse(null);
+                .orElseGet(() ->
+                        request.getAddresses().isEmpty()
+                                ? null
+                                : addressExtractionService
+                                .extractPlaceNameNearAddress(
+                                        reel.getCaption(),
+                                        request.getAddresses().get(0)
+                                )
+                                .orElse(null)
+                );
+
 
         // 각 주소로 Google Places 검색
         for (String address : request.getAddresses()) {

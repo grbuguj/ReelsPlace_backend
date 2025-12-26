@@ -18,34 +18,40 @@ public class AddressExtractionService {
 
     // 주소 패턴 정규식
     private static final List<Pattern> ADDRESS_PATTERNS = List.of(
-            // "주소 : ", "주소: ", "주소 :", "주소:"
-            Pattern.compile("주소\\s*[:\\：]\\s*([^\\n]+)"),
-            // "위치 : ", "위치: ", "위치 :", "위치:"
-            Pattern.compile("위치\\s*[:\\：]\\s*([^\\n]+)"),
-            // 📍 이모지 뒤 주소
-            Pattern.compile("\uD83D\uDCCD\\s*([^\\n]+)"),
-            // @ 태그 형식 (예: @서울 강남구...)
-            Pattern.compile("@([가-힣\\s]+(?:구|동|로|길)\\s*[0-9-]+[^\\n]*)"),
-            // 일반 한국 주소 패턴 (시/도 + 구/군 + 동/읍/면)
-            Pattern.compile("([가-힣]+(?:특별시|광역시|시|도)\\s+[가-힣]+(?:구|군)\\s+[가-힣]+(?:동|읍|면|로|길)\\s*[0-9-]*)")
+            Pattern.compile(
+                    "(" +
+                            // 1️⃣ 시/도 (서울, 경기, 부산, 전라남도 등)
+                            "(?:서울|부산|대구|인천|광주|대전|울산|세종|제주|[가-힣]+(?:도|특별시|광역시))\\s*" +
+
+                            // 2️⃣ 시/군/구 (있을 수도, 없을 수도)
+                            "(?:[가-힣]+(?:시|군|구)\\s*)*" +
+
+                            // 3️⃣ 동/읍/면/로/길 (핵심)
+                            "[가-힣0-9]+(?:동|읍|면|로|길)\\s*" +
+
+                            // 4️⃣ 번지 (있을 수도 없음)
+                            "[0-9-]*" +
+                            ")"
+            )
     );
+
+
 
     private static final List<Pattern> PLACE_NAME_PATTERNS = List.of(
-            // "매장 : OOO", "매장명: OOO"
+            // 1️⃣ 명시적
             Pattern.compile("매장(?:명)?\\s*[:\\：]\\s*([^,\\n]+)"),
 
-            // "카페 OOO", "맛집 OOO", "식당 OOO"
-            Pattern.compile("(?:카페|맛집|식당|바|술집)\\s+([가-힣A-Za-z0-9\\s]+)"),
+            // 2️⃣ 📍 강릉길감자
+            Pattern.compile("📍\\s*([가-힣0-9A-Za-z]+)"),
 
-            // 따옴표 안 매장명: "OOO", ‘OOO’
-            Pattern.compile("[\"“”‘’']\\s*([^\"“”‘’']{2,30})\\s*[\"“”‘’']"),
+            // 3️⃣ '강릉길감자'
+            Pattern.compile("[\"'‘’]([가-힣0-9A-Za-z]+)[\"'‘’]"),
 
-            // 📍 OOO (주소 말고 상호만 있는 경우)
-            Pattern.compile("\uD83D\uDCCD\\s*([가-힣A-Za-z0-9\\s]{2,30})"),
-
-            // 첫 줄 단독 매장명 (줄바꿈 전)
-            Pattern.compile("^([가-힣A-Za-z0-9\\s]{2,30})\\n")
+            // 4️⃣ 강릉길감자 (중앙시장)
+            Pattern.compile("([가-힣0-9A-Za-z]+)\\s*\\(")
     );
+
+
 
 
     /**
@@ -53,6 +59,25 @@ public class AddressExtractionService {
      * @param caption 릴스 캡션
      * @return 추출된 주소 리스트
      */
+
+    public Optional<String> extractPlaceNameNearAddress(String caption, String address) {
+        int idx = caption.indexOf(address);
+        if (idx <= 0) return Optional.empty();
+
+        int start = Math.max(0, idx - 15);
+        String candidate = caption.substring(start, idx).trim();
+
+        // 마지막 단어만 사용
+        String[] tokens = candidate.split("\\s+");
+        String last = tokens[tokens.length - 1];
+
+        if (last.length() >= 2 && isValidPlaceName(last)) {
+            return Optional.of(last);
+        }
+        return Optional.empty();
+    }
+
+
     public List<String> extractAddresses(String caption) {
         if (caption == null || caption.isBlank()) {
             log.debug("캡션이 비어있음");
@@ -74,6 +99,8 @@ public class AddressExtractionService {
                 }
             }
         }
+
+
 
         log.info("총 {}개 주소 추출 완료", addresses.size());
         return addresses;
@@ -120,7 +147,6 @@ public class AddressExtractionService {
         return placeName
                 .replaceAll("[#@]", "")      // 해시태그, @ 제거
                 .replaceAll("\\s+", " ")     // 공백 정리
-                .replaceAll("^(카페|맛집|식당|바)\\s*", "") // 접두 키워드 제거
                 .trim();
     }
     /**

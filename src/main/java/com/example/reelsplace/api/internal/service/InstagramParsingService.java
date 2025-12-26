@@ -37,8 +37,10 @@ public class InstagramParsingService {
     public String[] parseReelMetadata(String reelUrl) {
         try {
             // /reel/을 /p/로 변환
-            String normalizedUrl = reelUrl.replace("/reel/", "/p/");
-            
+            //String normalizedUrl = reelUrl.replace("/reel/", "/p/");
+
+            String normalizedUrl = reelUrl;
+
             // URL 끝의 쿼리 파라미터 제거 (있다면)
             if (normalizedUrl.contains("?")) {
                 normalizedUrl = normalizedUrl.substring(0, normalizedUrl.indexOf("?"));
@@ -52,18 +54,41 @@ public class InstagramParsingService {
             log.info("🔍 Instagram 파싱 시작 - URL: {}", normalizedUrl);
 
             // ✅ 썸네일: /media/?size=l 패턴 사용 (항상 작동!)
-            String thumbnailUrl = normalizedUrl + "/media/?size=l";
+
+            String thumbnailUrl1 = normalizedUrl.replace("/reel/", "/p/");
+            String thumbnailUrl = thumbnailUrl1 + "media/?size=l";
             log.info("📸 썸네일 URL 생성: {}", thumbnailUrl);
 
             // 캡션 추출 시도 (실패해도 계속 진행)
-            //String caption = "";
+            String caption = "낭만 가득한 라이브 재즈바\uD83C\uDFB6\uD83E\uDD42\n" +
+                    "\n" +
+                    "작은 유럽이 떠오르는 공간에서\n" +
+                    "라이브 재즈 공연까지..\n" +
+                    "로맨틱함 그 자체였어요\uD83D\uDC97\n" +
+                    "\n" +
+                    "서촌 데이트하며\n" +
+                    "분위기 내고 싶을 때 추천✨\n" +
+                    "\n" +
+                    "\uD83C\uDF77 연말 데이트/모임 장소 찾는 분들 저장 & 공유\n" +
+                    "\n" +
+                    "✔ 공연비 11,000원~15,000원\n" +
+                    "✔ 선착순 자리 배정\n" +
+                    "✔ 외부음식 케이크 가능\n" +
+                    "\n" +
+                    "\uD83D\uDCCD 하우스오브블루 / @houseofblue.seoul\n" +
+                    "\uD83D\uDCCD 서울 종로구 자하문로9길 6 지하 1층\n" +
+                    "\n" +
+                    "\uD83D\uDD70 목,금 19:00–2:00 / 토,일 18:00–2:00\n" +
+                    "(월,화 휴무)\n" +
+                    "\n" +
+                    "✅ 캐치테이블 / DM 예약가능\n" +
+                    "\uD83D\uDC40 12.24 DM 당일 예약 후 방문";
             //try {
             //    caption = extractCaption(normalizedUrl);
             //} catch (Exception e) {
-            //    log.warn("⚠️ 캡션 추출 실패 (썸네일은 성공): {}", e.getMessage());
+            //    log.warn("캡션 추출 실패: {}", e.getMessage());
             //}
 
-            String caption = "매장 :마망젤라또 성수점, 주소 :서울 성동구 연무장9길 8";
             log.info("✅ 파싱 완료!");
             log.info("📸 썸네일: {}", thumbnailUrl);
             log.info("📝 캡션: {}", caption.isEmpty() ? "(없음)" : 

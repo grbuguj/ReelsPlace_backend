@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/address-extraction-test.html").permitAll()
                         .requestMatchers("/reels-test.html").permitAll()
                         .requestMatchers("/place-pipeline.html").permitAll()
+                        .requestMatchers("/new_test.html").permitAll()
                         .anyRequest().authenticated()                            // 나머지는 인증 필요
                 )
                 

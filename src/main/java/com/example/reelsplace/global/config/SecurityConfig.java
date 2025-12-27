@@ -44,6 +44,9 @@ public class SecurityConfig {
                         .requestMatchers("/reels-test.html").permitAll()
                         .requestMatchers("/place-pipeline.html").permitAll()
                         .requestMatchers("/new_test.html").permitAll()
+                        .requestMatchers("/privacy.html").permitAll()
+                        .requestMatchers("/terms.html").permitAll()
+                        .requestMatchers("/deletion.html").permitAll()
                         .anyRequest().authenticated()                            // 나머지는 인증 필요
                 )
                 

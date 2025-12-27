@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Deletion - ReelsPlace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .content h2 {
+            color: #333;
+            font-size: 24px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        .content h2:first-child {
+            margin-top: 0;
+        }
+
+        .content p {
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .content ul {
+            margin-bottom: 15px;
+            margin-left: 20px;
+        }
+
+        .content li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .steps {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .steps h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .step {
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .step::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .email-link {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin: 20px 0;
+            transition: background 0.3s;
+        }
+
+        .email-link:hover {
+            background: #5568d3;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #999;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎬 ReelsPlace</h1>
+        <p class="subtitle">Data Deletion Request</p>
+    </div>
+
+    <div class="content">
+        <h2>Your Right to Delete Your Data</h2>
+        <p>
+            At ReelsPlace, we respect your privacy and your right to control your personal data.
+            You can request deletion of your account and associated data at any time.
+        </p>
+
+        <div class="info-box">
+            <strong>⏱️ Processing Time:</strong> We will process your deletion request within 30 days of receipt.
+        </div>
+
+        <h2>What Data Will Be Deleted</h2>
+        <p>When you request account deletion, we will permanently delete:</p>
+        <table>
+            <thead>
+            <tr>
+                <th>Data Type</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><strong>Account Information</strong></td>
+                <td>Your email address and profile information</td>
+            </tr>
+            <tr>
+                <td><strong>Saved Locations</strong></td>
+                <td>All places you've saved from Instagram Reels</td>
+            </tr>
+            <tr>
+                <td><strong>User Preferences</strong></td>
+                <td>Any settings or preferences you've configured</td>
+            </tr>
+            <tr>
+                <td><strong>Usage History</strong></td>
+                <td>Your activity logs within our service</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h2>What Data We Do NOT Store</h2>
+        <div class="info-box">
+            <p><strong>Important Note:</strong> We do not permanently store Instagram oEmbed data.</p>
+            <ul style="margin-top: 10px;">
+                <li>Instagram Reel embed HTML is fetched in real-time and not stored</li>
+                <li>Caption text is only processed temporarily for location extraction</li>
+                <li>We do not store copies of Instagram videos or images</li>
+            </ul>
+        </div>
+
+        <h2>How to Request Data Deletion</h2>
+
+        <div class="steps">
+            <h3>📧 Email Request (Recommended)</h3>
+            <div class="step">
+                Send an email to <strong>deletion@woong.io.kr</strong>
+            </div>
+            <div class="step">
+                Include your account email address or the email you used to sign in
+            </div>
+            <div class="step">
+                Subject line: "Data Deletion Request - ReelsPlace"
+            </div>
+            <div class="step">
+                We will confirm receipt within 3 business days
+            </div>
+            <div class="step">
+                Your data will be deleted within 30 days
+            </div>
+        </div>
+
+        <a href="mailto:deletion@woong.io.kr?subject=Data%20Deletion%20Request%20-%20ReelsPlace&body=Please%20delete%20my%20account%20and%20all%20associated%20data.%0A%0AMy%20account%20email%3A%20%5Benter%20your%20email%20here%5D" class="email-link">
+            📧 Send Deletion Request Email
+        </a>
+
+        <div class="warning-box">
+            <strong>⚠️ Important:</strong> Data deletion is permanent and cannot be undone.
+            Once your data is deleted, you will not be able to recover your saved locations or account information.
+        </div>
+
+        <h2>Alternative: Account Deactivation</h2>
+        <p>
+            If you're not sure about permanent deletion, you can temporarily deactivate your account instead:
+        </p>
+        <ul>
+            <li>Your data will be preserved but not accessible</li>
+            <li>You can reactivate your account at any time</li>
+            <li>Contact us at <strong>support@woong.io.kr</strong> to request deactivation</li>
+        </ul>
+
+        <h2>Data Deletion Timeline</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Stage</th>
+                <th>Timeframe</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Confirmation Email</td>
+                <td>Within 3 business days</td>
+            </tr>
+            <tr>
+                <td>Account Deactivation</td>
+                <td>Immediately upon confirmation</td>
+            </tr>
+            <tr>
+                <td>Complete Data Deletion</td>
+                <td>Within 30 days</td>
+            </tr>
+            <tr>
+                <td>Backup Removal</td>
+                <td>Within 90 days</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h2>Exceptions</h2>
+        <p>We may retain certain information when required by law or for legitimate business purposes:</p>
+        <ul>
+            <li>Legal obligations (tax records, legal disputes)</li>
+            <li>Fraud prevention and security</li>
+            <li>Anonymized usage statistics (non-personally identifiable)</li>
+        </ul>
+
+        <h2>Questions or Concerns</h2>
+        <p>
+            If you have any questions about the data deletion process, please contact us:
+        </p>
+        <ul>
+            <li><strong>Email:</strong> privacy@woong.io.kr</li>
+            <li><strong>Data Deletion:</strong> deletion@woong.io.kr</li>
+            <li><strong>General Support:</strong> support@woong.io.kr</li>
+        </ul>
+
+        <h2>Related Policies</h2>
+        <ul>
+            <li><a href="privacy.html">Privacy Policy</a> - How we handle your data</li>
+            <li><a href="terms.html">Terms of Service</a> - Terms of using ReelsPlace</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        <p>© 2024 ReelsPlace. All rights reserved.</p>
+        <p style="margin-top: 10px;">
+            We are committed to protecting your privacy and respecting your data rights.
+        </p>
+    </div>
+</div>
+</body>
+</html>

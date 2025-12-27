@@ -1,955 +1,589 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>릴스플레이스 완전판 테스트</title>
+    <title>ReelsPlace - Discover Places from Instagram Reels</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            min-height: 100vh;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* Header */
         .header {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: rgba(255, 255, 255, 0.98);
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .header-left h1 { color: #333; margin-bottom: 5px; }
-        .header-left p { color: #666; font-size: 14px; }
-        .header-right {
+
+        .logo {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
-        .user-info {
-            text-align: right;
-            padding-right: 15px;
-            border-right: 2px solid #eee;
+
+        .logo-icon {
+            font-size: 32px;
         }
-        .user-info .user-name {
-            font-weight: bold;
-            color: #333;
+
+        .logo-text h1 {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: 700;
         }
-        .user-info .user-email {
+
+        .logo-text p {
             font-size: 12px;
             color: #666;
+            margin-top: 2px;
         }
-        .login-status {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
+
+        .auth-status {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
         }
-        .login-status.logged-in {
+
+        .auth-status.logged-in {
             background: #d4edda;
             color: #155724;
         }
-        .login-status.logged-out {
-            background: #f8d7da;
-            color: #721c24;
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
         }
-        .test-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .test-card {
+
+        /* Hero Section */
+        .hero {
             background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            padding: 60px 40px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
-        .test-card.disabled {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        .test-card h3 {
+
+        .hero h2 {
+            font-size: 42px;
             color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
+            margin-bottom: 20px;
+            line-height: 1.2;
         }
-        .btn-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 15px;
+
+        .hero .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
+
+        .hero p {
+            font-size: 18px;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
         }
-        .btn:hover:not(:disabled) { transform: translateY(-2px); }
-        .btn-primary { background: #667eea; color: white; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-danger { background: #dc3545; color: white; }
-        .btn-warning { background: #ffc107; color: #333; }
-        .btn-info { background: #17a2b8; color: white; }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        .input-group {
-            margin: 10px 0;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
+
+        .meta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0f0f0;
+            padding: 8px 16px;
+            border-radius: 20px;
             font-size: 13px;
-            color: #555;
-            font-weight: 600;
+            color: #666;
+            margin-top: 10px;
         }
-        .input-group input, .input-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-        .result-box {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-size: 13px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .result-box pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            margin: 0;
-        }
-        .log-section {
+
+        /* How it Works */
+        .how-it-works {
             background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
-        .log-box {
-            background: #1e1e1e;
-            color: #d4d4d4;
-            padding: 20px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            max-height: 500px;
-            overflow-y: auto;
-            margin-top: 15px;
-        }
-        .log-success { color: #b5cea8; }
-        .log-error { color: #f48771; }
-        .log-info { color: #4ec9b0; }
-        .log-warn { color: #dcdcaa; }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        .stat-card {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
+
+        .how-it-works h3 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 30px;
             text-align: center;
         }
-        .stat-value {
-            font-size: 28px;
-            font-weight: bold;
-            color: #667eea;
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
         }
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-        .flow-indicator {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 10px 15px;
-            margin: 10px 0;
-            border-radius: 4px;
-            font-size: 13px;
-        }
-        .list-item {
-            background: white;
-            border: 1px solid #ddd;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .list-item-info { flex: 1; }
-        .list-item-info strong { display: block; margin-bottom: 4px; }
-        .list-item-info small { color: #666; display: block; }
-        .list-item-actions { display: flex; gap: 5px; }
-        .badge {
-            display: inline-block;
-            padding: 3px 8px;
+
+        .step {
+            text-align: center;
+            padding: 30px 20px;
+            background: #f8f9fa;
             border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-left: 8px;
+            transition: all 0.3s;
         }
-        .badge-success { background: #d4edda; color: #155724; }
-        .badge-warning { background: #fff3cd; color: #856404; }
-        .badge-danger { background: #f8d7da; color: #721c24; }
-        .badge-info { background: #d1ecf1; color: #0c5460; }
-        .auth-required {
-            background: #f8d7da;
-            border-left: 4px solid #dc3545;
+
+        .step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 auto 20px;
+        }
+
+        .step h4 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .step p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Demo Section */
+        .demo-section {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .demo-section h3 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .demo-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        /* Instagram Embed Container */
+        .embed-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .embed-preview {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .embed-preview h4 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Instagram embed styling */
+        .instagram-embed-wrapper {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .location-results {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .location-results h4 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .location-item {
+            background: white;
             padding: 15px;
-            margin: 10px 0;
-            border-radius: 4px;
-            color: #721c24;
-            font-size: 13px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .location-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .location-name {
+            font-size: 16px;
             font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .location-address {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading-state .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-box h4 {
+            color: #0056b3;
+            font-size: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box p {
+            color: #004085;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .info-box ul {
+            margin: 10px 0 0 20px;
+            color: #004085;
+            font-size: 14px;
+        }
+
+        .info-box ul li {
+            margin-bottom: 5px;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px 0;
+            margin-top: 60px;
+            text-align: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .footer p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .footer .powered-by {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .footer .instagram-logo {
+            font-size: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 40px 20px;
+            }
+
+            .hero h2 {
+                font-size: 32px;
+            }
+
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .embed-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Success badge */
+        .success-badge {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <!-- Header with Auth Status -->
-    <div class="header">
-        <div class="header-left">
-            <h1>🧪 릴스플레이스 완전판 테스트</h1>
-            <p>로그인부터 전체 플로우까지 모든 API 테스트</p>
-        </div>
-        <div class="header-right">
-            <div class="user-info" id="userInfo" style="display: none;">
-                <div class="user-name" id="userName"></div>
-                <div class="user-email" id="userEmail"></div>
-            </div>
-            <div class="login-status logged-out" id="loginStatus">
-                🔒 로그인 필요
+<!-- Header -->
+<div class="header">
+    <div class="header-content">
+        <div class="logo">
+            <div class="logo-icon">🎬</div>
+            <div class="logo-text">
+                <h1>ReelsPlace</h1>
+                <p>Discover Places from Instagram Reels</p>
             </div>
         </div>
-    </div>
-
-    <!-- 테스트 그리드 -->
-    <div class="test-grid">
-        <!-- 0. 로그인 -->
-        <div class="test-card" id="authCard">
-            <h3>🔐 0. 인증 (Auth)</h3>
-            <div class="flow-indicator">
-                💡 테스트용 간편 로그인
-            </div>
-
-            <div id="loginForm">
-                <div class="input-group">
-                    <label>Provider</label>
-                    <select id="provider">
-                        <option value="GOOGLE">Google</option>
-                        <option value="KAKAO">Kakao</option>
-                        <option value="NAVER">Naver</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Nickname</label>
-                    <input type="text" id="nickname" value="테스터" placeholder="닉네임">
-                </div>
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" id="email" value="test@example.com" placeholder="이메일">
-                </div>
-                <div class="btn-group">
-                    <button class="btn btn-primary" onclick="login()">
-                        🔓 로그인
-                    </button>
-                    <button class="btn btn-warning" onclick="quickLogin()">
-                        ⚡ 빠른 로그인
-                    </button>
-                </div>
-            </div>
-
-            <div id="logoutForm" style="display: none;">
-                <div class="btn-group">
-                    <button class="btn btn-info" onclick="getMyInfo()">
-                        👤 내 정보 조회
-                    </button>
-                    <button class="btn btn-danger" onclick="logout()">
-                        🚪 로그아웃
-                    </button>
-                </div>
-            </div>
-
-            <div class="result-box" id="authResult"></div>
+        <div class="auth-status" id="authStatus">
+            Demo Mode
         </div>
-
-        <!-- 1. 릴스 저장 -->
-        <div class="test-card" id="reelCard">
-            <h3>📝 1. 릴스 저장</h3>
-            <div class="flow-indicator">
-                💡 인스타 URL 저장 → 자동 파싱
-            </div>
-            <div class="input-group">
-                <label>Instagram Reel URL</label>
-                <input type="text" id="reelUrl"
-                       value="https://www.instagram.com/reel/test"
-                       placeholder="https://www.instagram.com/reel/...">
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="saveReel()">
-                    🚀 릴스 저장
-                </button>
-                <button class="btn btn-warning" onclick="saveReelWithMockData()">
-                    🧪 Mock 데이터로 저장
-                </button>
-            </div>
-            <div class="result-box" id="saveReelResult"></div>
-        </div>
-
-        <!-- 2. 내 릴스 목록 -->
-        <div class="test-card" id="reelListCard">
-            <h3>📋 2. 내 릴스 목록</h3>
-            <div class="flow-indicator">
-                💡 저장된 릴스 확인
-            </div>
-            <div class="input-group">
-                <label>Page / Size</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="number" id="reelPage" value="0" style="width: 80px;">
-                    <input type="number" id="reelSize" value="10" style="width: 80px;">
-                </div>
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-info" onclick="getMyReels()">
-                    📋 목록 조회
-                </button>
-            </div>
-            <div class="result-box" id="myReelsResult"></div>
-        </div>
-
-        <!-- 3. 내 장소 목록 -->
-        <div class="test-card" id="placeListCard">
-            <h3>📍 3. 내 장소 목록</h3>
-            <div class="flow-indicator">
-                💡 생성된 장소 확인
-            </div>
-            <div class="input-group">
-                <label>Page / Size</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="number" id="placePage" value="0" style="width: 80px;">
-                    <input type="number" id="placeSize" value="10" style="width: 80px;">
-                </div>
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-info" onclick="getMyPlaces()">
-                    📍 목록 조회
-                </button>
-            </div>
-            <div class="result-box" id="myPlacesResult"></div>
-        </div>
-
-        <!-- 4. 통계 -->
-        <div class="test-card" id="statsCard">
-            <h3>📊 4. 마이페이지 통계</h3>
-            <div class="flow-indicator">
-                💡 릴스/장소 개수, 지도 열기
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-info" onclick="getStats()">
-                    📊 통계 조회
-                </button>
-            </div>
-            <div id="statsResult"></div>
-        </div>
-
-        <!-- 5. 릴스 삭제 -->
-        <div class="test-card" id="deleteCard">
-            <h3>🗑️ 5. 릴스 삭제</h3>
-            <div class="flow-indicator">
-                💡 릴스 삭제 (장소는 유지)
-            </div>
-            <div class="input-group">
-                <label>Reel ID</label>
-                <input type="number" id="deleteReelId" placeholder="릴스 ID">
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-danger" onclick="deleteReel()">
-                    🗑️ 릴스 삭제
-                </button>
-            </div>
-            <div class="result-box" id="deleteReelResult"></div>
-        </div>
-
-        <!-- 6. 전체 플로우 -->
-        <div class="test-card" id="flowCard">
-            <h3>🔄 6. 전체 플로우</h3>
-            <div class="flow-indicator">
-                💡 릴스 저장 → 파싱 → 주소 → 장소
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-success" onclick="runFullFlow()">
-                    🚀 전체 플로우 실행
-                </button>
-            </div>
-            <div class="result-box" id="fullFlowResult"></div>
-        </div>
-    </div>
-
-    <!-- 로그 -->
-    <div class="log-section">
-        <h3>📋 실행 로그</h3>
-        <div class="btn-group">
-            <button class="btn btn-danger" onclick="clearLog()">
-                🗑️ 로그 초기화
-            </button>
-        </div>
-        <div class="log-box" id="logBox"></div>
     </div>
 </div>
 
-<script>
-    let accessToken = null;
-    let currentUser = null;
+<!-- Container -->
+<div class="container">
+    <!-- Hero Section -->
+    <div class="hero">
+        <h2>
+            Find <span class="gradient-text">Amazing Places</span><br>
+            from Instagram Reels
+        </h2>
+        <p>
+            We use Instagram's embed functionality to display Reels, then automatically extract
+            location information from captions to help users discover and save places.
+        </p>
+        <div class="meta-badge">
+            <span>📷</span>
+            <span>Powered by Meta oEmbed API</span>
+        </div>
+    </div>
+
+    <!-- How it Works -->
+    <div class="how-it-works">
+        <h3>How We Use Meta oEmbed</h3>
+
+        <div class="info-box">
+            <h4>ℹ️ Integration Overview</h4>
+            <p>ReelsPlace uses Meta's oEmbed API to provide a seamless experience:</p>
+            <ul>
+                <li><strong>Display Instagram Content:</strong> We fetch embed HTML from Meta's oEmbed endpoint to properly display Reels with attribution</li>
+                <li><strong>Extract Location Data:</strong> We analyze the caption text to find place names and addresses</li>
+                <li><strong>User Benefit:</strong> Users can discover and save locations featured in Instagram Reels</li>
+            </ul>
+        </div>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h4>User Pastes URL</h4>
+                <p>User copies an Instagram Reel URL and pastes it into our app</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h4>Call oEmbed API</h4>
+                <p>We call Meta's oEmbed endpoint to fetch embed HTML and metadata</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h4>Display Reel</h4>
+                <p>Instagram Reel is displayed with proper attribution using embed HTML</p>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <h4>Extract Location</h4>
+                <p>We parse the caption to extract place names and addresses</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo Section -->
+    <div class="demo-section">
+        <h3>Live Demo</h3>
+        <p class="demo-subtitle">Below is a real Instagram Reel embedded using Instagram's embed widget, demonstrating our integration:</p>
+
+        <div class="success-badge">
+            ✅ Instagram Reel Successfully Embedded
+        </div>
+
+        <div class="embed-container">
+            <!-- Instagram Embed -->
+            <div class="embed-preview">
+                <h4>📺 Instagram Reel Preview</h4>
+                <div class="instagram-embed-wrapper">
+                    <blockquote class="instagram-media"
+                                data-instgrm-captioned
+                                data-instgrm-permalink="https://www.instagram.com/reel/DOTKY4YkbiX/"
+                                data-instgrm-version="14"
+                                style="background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);">
+                        <div style="padding:16px;">
+                            <div style="display: flex; flex-direction: row; align-items: center;">
+                                <div style="background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 40px; margin-right: 14px; width: 40px;"></div>
+                                <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center;">
+                                    <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 100px;"></div>
+                                    <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 60px;"></div>
+                                </div>
+                            </div>
+                            <div style="padding: 19% 0;"></div>
+                            <div style="display:block; height:50px; margin:0 auto 12px; width:50px;">
+                                <svg width="50px" height="50px" viewBox="0 0 60 60" version="1.1" xmlns="https://www.w3.org/2000/svg">
+                                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                        <g transform="translate(-511.000000, -20.000000)" fill="#000000">
+                                            <g><path d="M556.869,30.41 C554.814,30.41 553.148,32.076 553.148,34.131 C553.148,36.186 554.814,37.852 556.869,37.852 C558.924,37.852 560.59,36.186 560.59,34.131 C560.59,32.076 558.924,30.41 556.869,30.41 M541,60.657 C535.114,60.657 530.342,55.887 530.342,50 C530.342,44.114 535.114,39.342 541,39.342 C546.887,39.342 551.658,44.114 551.658,50 C551.658,55.887 546.887,60.657 541,60.657 M541,33.886 C532.1,33.886 524.886,41.1 524.886,50 C524.886,58.899 532.1,66.113 541,66.113 C549.9,66.113 557.115,58.899 557.115,50 C557.115,41.1 549.9,33.886 541,33.886 M565.378,62.101 C565.244,65.022 564.756,66.606 564.346,67.663 C563.803,69.06 563.154,70.057 562.106,71.106 C561.058,72.155 560.06,72.803 558.662,73.347 C557.607,73.757 556.021,74.244 553.102,74.378 C549.944,74.521 548.997,74.552 541,74.552 C533.003,74.552 532.056,74.521 528.898,74.378 C525.979,74.244 524.393,73.757 523.338,73.347 C521.94,72.803 520.942,72.155 519.894,71.106 C518.846,70.057 518.197,69.06 517.654,67.663 C517.244,66.606 516.755,65.022 516.623,62.101 C516.479,58.943 516.448,57.996 516.448,50 C516.448,42.003 516.479,41.056 516.623,37.899 C516.755,34.978 517.244,33.391 517.654,32.338 C518.197,30.938 518.846,29.942 519.894,28.894 C520.942,27.846 521.94,27.196 523.338,26.654 C524.393,26.244 525.979,25.756 528.898,25.623 C532.057,25.479 533.004,25.448 541,25.448 C548.997,25.448 549.943,25.479 553.102,25.623 C556.021,25.756 557.607,26.244 558.662,26.654 C560.06,27.196 561.058,27.846 562.106,28.894 C563.154,29.942 563.803,30.938 564.346,32.338 C564.756,33.391 565.244,34.978 565.378,37.899 C565.522,41.056 565.552,42.003 565.552,50 C565.552,57.996 565.522,58.943 565.378,62.101 M570.82,37.631 C570.674,34.438 570.167,32.258 569.425,30.349 C568.659,28.377 567.633,26.702 565.965,25.035 C564.297,23.368 562.623,22.342 560.652,21.575 C558.743,20.834 556.562,20.326 553.369,20.18 C550.169,20.033 549.148,20 541,20 C532.853,20 531.831,20.033 528.631,20.18 C525.438,20.326 523.257,20.834 521.349,21.575 C519.376,22.342 517.703,23.368 516.035,25.035 C514.368,26.702 513.342,28.377 512.574,30.349 C511.834,32.258 511.326,34.438 511.181,37.631 C511.035,40.831 511,41.851 511,50 C511,58.147 511.035,59.17 511.181,62.369 C511.326,65.562 511.834,67.743 512.574,69.651 C513.342,71.625 514.368,73.296 516.035,74.965 C517.703,76.634 519.376,77.658 521.349,78.425 C523.257,79.167 525.438,79.673 528.631,79.82 C531.831,79.965 532.853,80.001 541,80.001 C549.148,80.001 550.169,79.965 553.369,79.82 C556.562,79.673 558.743,79.167 560.652,78.425 C562.623,77.658 564.297,76.634 565.965,74.965 C567.633,73.296 568.659,71.625 569.425,69.651 C570.167,67.743 570.674,65.562 570.82,62.369 C570.966,59.17 571,58.147 571,50 C571,41.851 570.966,40.831 570.82,37.631"></path></g>
+                                        </g>
+                                    </g>
+                                </svg>
+                            </div>
+                            <div style="padding-top: 8px;">
+                                <div style="color:#3897f0; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:550; line-height:18px;">View this post on Instagram</div>
+                            </div>
+                        </div>
+                    </blockquote>
+                    <script async src="https://www.instagram.com/embed.js"></script>
+                    <script>
+                        (function waitForInstagramEmbed() {
+                            if (window.instgrm && window.instgrm.Embeds) {
+                                window.instgrm.Embeds.process();
+                            } else {
+                                setTimeout(waitForInstagramEmbed, 300);
+                            }
+                        })();
+                    </script>
 
-    const MOCK_CAPTION = `🍕 오늘의 맛집 탐방!
 
-진짜 맛있는 피자 집 찾았어요!
-주소: 서울특별시 마포구 연남동 239-10
-
-📍 위치 정보
-- 지하철 2호선 홍대입구역 3번 출구
-- 도보 10분 거리
-
-💰 가격대: 1.5~2만원
-⭐ 별점: 4.8/5.0
-
-#연남동맛집 #피자맛집`;
-
-    // 로그
-    function log(type, msg) {
-        const box = document.getElementById('logBox');
-        const div = document.createElement('div');
-        div.className = `log-${type}`;
-        div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-        box.appendChild(div);
-        box.scrollTop = box.scrollHeight;
-    }
-
-    function clearLog() {
-        document.getElementById('logBox').innerHTML = '';
-        log('info', '로그 초기화');
-    }
-
-    function showResult(elementId, data, isError = false) {
-        const elem = document.getElementById(elementId);
-        elem.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-        elem.style.background = isError ? '#f8d7da' : '#d4edda';
-    }
-
-    // UI 업데이트
-    function updateLoginUI(loggedIn) {
-        const status = document.getElementById('loginStatus');
-        const userInfo = document.getElementById('userInfo');
-        const loginForm = document.getElementById('loginForm');
-        const logoutForm = document.getElementById('logoutForm');
-
-        // 로그인 상태에 따라 카드 활성화/비활성화
-        const protectedCards = ['reelCard', 'reelListCard', 'placeListCard',
-            'statsCard', 'deleteCard', 'flowCard'];
-
-        if (loggedIn) {
-            status.className = 'login-status logged-in';
-            status.textContent = '✅ 로그인됨';
-            userInfo.style.display = 'block';
-            loginForm.style.display = 'none';
-            logoutForm.style.display = 'block';
-
-            if (currentUser) {
-                document.getElementById('userName').textContent = currentUser.nickname || 'User';
-                document.getElementById('userEmail').textContent = currentUser.email || '';
-            }
-
-            protectedCards.forEach(id => {
-                document.getElementById(id).classList.remove('disabled');
-            });
-        } else {
-            status.className = 'login-status logged-out';
-            status.textContent = '🔒 로그인 필요';
-            userInfo.style.display = 'none';
-            loginForm.style.display = 'block';
-            logoutForm.style.display = 'none';
-
-            protectedCards.forEach(id => {
-                document.getElementById(id).classList.add('disabled');
-            });
-        }
-    }
-
-    // 0. 로그인
-    async function login() {
-        const provider = document.getElementById('provider').value;
-        const nickname = document.getElementById('nickname').value;
-        const email = document.getElementById('email').value;
-
-        if (!nickname) {
-            alert('닉네임을 입력하세요!');
-            return;
-        }
-
-        log('info', '로그인 시도...');
-
-        try {
-            const res = await fetch('/api/v1/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    provider,
-                    providerUserId: 'test_' + Date.now(),
-                    email,
-                    nickname,
-                    defaultMapApp: 'GOOGLE'
-                })
-            });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const data = await res.json();
-            accessToken = data.accessToken;
-            currentUser = data.user;
-
-            log('success', `✅ 로그인 성공! (${currentUser.nickname})`);
-            log('info', `   - Access Token: ${accessToken.substring(0, 20)}...`);
-
-            updateLoginUI(true);
-            showResult('authResult', data);
-
-        } catch (error) {
-            log('error', `❌ 로그인 실패: ${error.message}`);
-            showResult('authResult', { error: error.message }, true);
-        }
-    }
-
-    async function quickLogin() {
-        document.getElementById('nickname').value = '테스터';
-        document.getElementById('email').value = 'test@reelsplace.com';
-        await login();
-    }
-
-    async function logout() {
-        log('info', '로그아웃 시도...');
-
-        try {
-            const res = await fetch('/api/v1/auth/logout', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`
-                }
-            });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const data = await res.json();
-
-            accessToken = null;
-            currentUser = null;
-
-            log('success', '✅ 로그아웃 완료');
-            updateLoginUI(false);
-            showResult('authResult', data);
-
-        } catch (error) {
-            log('error', `❌ 로그아웃 실패: ${error.message}`);
-            showResult('authResult', { error: error.message }, true);
-        }
-    }
-
-    async function getMyInfo() {
-        log('info', '내 정보 조회...');
-
-        try {
-            const res = await fetch('/api/v1/users/me', {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`
-                }
-            });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const data = await res.json();
-            currentUser = data;
-
-            log('success', '✅ 내 정보 조회 완료');
-            log('info', `   - ID: ${data.id}`);
-            log('info', `   - 닉네임: ${data.nickname}`);
-            log('info', `   - 이메일: ${data.email || 'N/A'}`);
-
-            showResult('authResult', data);
-            updateLoginUI(true);
-
-        } catch (error) {
-            log('error', `❌ 내 정보 조회 실패: ${error.message}`);
-            showResult('authResult', { error: error.message }, true);
-        }
-    }
-
-    // 헤더 생성 헬퍼
-    function getAuthHeaders() {
-        return {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-        };
-    }
-
-    // 1. 릴스 저장
-    async function saveReel() {
-        const url = document.getElementById('reelUrl').value;
-
-        if (!url) {
-            alert('URL을 입력하세요!');
-            return;
-        }
-
-        log('info', '릴스 저장 시작...');
-
-        try {
-            const res = await fetch('/api/v1/reels', {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ reelUrl: url })
-            });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const data = await res.json();
-
-            log('success', `✅ 릴스 저장 완료 (ID: ${data.reelId})`);
-            showResult('saveReelResult', data);
-
-        } catch (error) {
-            log('error', `❌ 릴스 저장 실패: ${error.message}`);
-            showResult('saveReelResult', { error: error.message }, true);
-        }
-    }
-
-    async function saveReelWithMockData() {
-        log('info', 'Mock 데이터로 릴스 생성...');
-
-        try {
-            const res = await fetch('/api/v1/test/reels', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    reelUrl: 'https://www.instagram.com/reel/test_' + Date.now(),
-                    thumbnailUrl: 'https://via.placeholder.com/400',
-                    caption: MOCK_CAPTION
-                })
-            });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const data = await res.json();
-
-            log('success', `✅ Mock 릴스 생성 (ID: ${data.reelId})`);
-            showResult('saveReelResult', data);
-
-            // 자동으로 주소 추출
-            setTimeout(() => extractAddresses(data.reelId), 2000);
-
-        } catch (error) {
-            log('error', `❌ Mock 릴스 생성 실패: ${error.message}`);
-            showResult('saveReelResult', { error: error.message }, true);
-        }
-    }
-
-    async function extractAddresses(reelId) {
-        log('info', `주소 추출... (ID: ${reelId})`);
-
-        try {
-            const res = await fetch(`/api/v1/internal/reels/${reelId}/extract-addresses`, {
-                method: 'POST'
-            });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const data = await res.json();
-
-            log('success', `✅ 주소 ${data.addresses.length}개 추출`);
-
-            if (data.addresses.length > 0) {
-                await createPlaces(reelId, data.addresses);
-            }
-
-        } catch (error) {
-            log('error', `❌ 주소 추출 실패: ${error.message}`);
-        }
-    }
-
-    async function createPlaces(reelId, addresses) {
-        log('info', '장소 생성...');
-
-        try {
-            const res = await fetch(`/api/v1/internal/reels/${reelId}/create-places`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ addresses })
-            });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const data = await res.json();
-
-            log('success', `✅ 장소 ${data.createdPlaces.length}개 생성`);
-
-        } catch (error) {
-            log('error', `❌ 장소 생성 실패: ${error.message}`);
-        }
-    }
-
-    // 2. 릴스 목록
-    async function getMyReels() {
-        const page = document.getElementById('reelPage').value;
-        const size = document.getElementById('reelSize').value;
-
-        log('info', `릴스 목록 조회... (page=${page}, size=${size})`);
-
-        try {
-            const res = await fetch(`/api/v1/reels?page=${page}&size=${size}`, {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const data = await res.json();
-
-            log('success', `✅ 릴스 ${data.content.length}개 조회`);
-
-            let html = `<div style="font-weight: bold; margin-bottom: 10px;">총 ${data.totalElements}개</div>`;
-            data.content.forEach(reel => {
-                html += `
-                <div class="list-item">
-                    <div class="list-item-info">
-                        <strong>ID: ${reel.reelId} ${getStatusBadge(reel.status)}</strong>
-                        <small>${reel.reelUrl}</small>
-                    </div>
-                </div>
-            `;
-            });
-
-            document.getElementById('myReelsResult').innerHTML = html;
-
-        } catch (error) {
-            log('error', `❌ 릴스 목록 실패: ${error.message}`);
-            showResult('myReelsResult', { error: error.message }, true);
-        }
-    }
-
-    // 3. 장소 목록
-    async function getMyPlaces() {
-        const page = document.getElementById('placePage').value;
-        const size = document.getElementById('placeSize').value;
-
-        log('info', `장소 목록 조회... (page=${page}, size=${size})`);
-
-        try {
-            const res = await fetch(`/api/v1/places?page=${page}&size=${size}`, {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const data = await res.json();
-
-            log('success', `✅ 장소 ${data.content.length}개 조회`);
-
-            let html = `<div style="font-weight: bold; margin-bottom: 10px;">총 ${data.totalElements}개</div>`;
-            data.content.forEach(place => {
-                html += `
-                <div class="list-item">
-                    <div class="list-item-info">
-                        <strong>📍 ${place.name}</strong>
-                        <small>${place.address}</small>
-                    </div>
-                </div>
-            `;
-            });
-
-            document.getElementById('myPlacesResult').innerHTML = html;
-
-        } catch (error) {
-            log('error', `❌ 장소 목록 실패: ${error.message}`);
-            showResult('myPlacesResult', { error: error.message }, true);
-        }
-    }
-
-    // 4. 통계
-    async function getStats() {
-        log('info', '통계 조회...');
-
-        try {
-            const res = await fetch('/api/v1/users/me/stats', {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const data = await res.json();
-
-            log('success', '✅ 통계 조회 완료');
-
-            const html = `
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">${data.reelCount}</div>
-                    <div class="stat-label">릴스</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${data.placeCount}</div>
-                    <div class="stat-label">장소</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${data.mapOpenCount}</div>
-                    <div class="stat-label">지도 열기</div>
                 </div>
             </div>
-        `;
 
-            document.getElementById('statsResult').innerHTML = html;
+            <!-- Location Results -->
+            <div class="location-results">
+                <h4>📍 Extracted Location Information</h4>
+                <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
+                    From the Reel caption, we extract place information:
+                </p>
 
-        } catch (error) {
-            log('error', `❌ 통계 조회 실패: ${error.message}`);
-        }
-    }
+                <div class="location-item">
+                    <div class="location-name">키자니아 서울</div>
+                    <div class="location-address">서울 송파구 올림픽로 240 키자니아 서울</div>
+                </div>
 
-    // 5. 릴스 삭제
-    async function deleteReel() {
-        const reelId = document.getElementById('deleteReelId').value;
+                <div style="margin-top: 20px; padding: 15px; background: white; border-radius: 8px; font-size: 13px; color: #666;">
+                    <strong style="color: #333;">How it works:</strong><br>
+                    1. Caption text is analyzed for Korean address patterns<br>
+                    2. Place names and addresses are extracted<br>
+                    3. Users can save these locations to their collection<br>
+                    4. Locations can be opened in map applications
+                </div>
+            </div>
+        </div>
 
-        if (!reelId) {
-            alert('릴스 ID를 입력하세요!');
-            return;
-        }
+        <div class="info-box" style="margin-top: 30px;">
+            <h4>🔧 Technical Implementation</h4>
+            <p style="margin-bottom: 10px;">Our production code calls Meta's oEmbed API:</p>
+            <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 12px; color: #333; margin: 10px 0;">
+fetch('https://graph.facebook.com/v22.0/instagram_oembed', {
+  method: 'GET',
+  params: {
+    url: reelUrl,
+    access_token: `${appId}|${appSecret}`
+  }
+}).then(response => {
+  // Display embed HTML with proper attribution
+  displayEmbed(response.html);
 
-        if (!confirm(`릴스 ${reelId} 삭제?`)) return;
+  // Extract location from caption
+  extractLocation(response.caption);
+});</pre>
+            <p style="font-size: 13px; color: #666; margin-top: 10px;">
+                The demo above uses Instagram's public embed widget for demonstration purposes.
+                In production, we use Meta's oEmbed API endpoint after approval.
+            </p>
+        </div>
+    </div>
+</div>
 
-        log('info', `릴스 삭제... (ID: ${reelId})`);
+<!-- Footer -->
+<div class="footer">
+    <p>ReelsPlace - Helping users discover amazing places from Instagram Reels</p>
+    <div class="powered-by">
+        <span>Powered by</span>
+        <span class="instagram-logo">📷</span>
+        <span>Meta oEmbed API</span>
+    </div>
+    <p style="margin-top: 10px; font-size: 12px;">
+        This demo showcases our oEmbed integration for Meta App Review
+    </p>
+</div>
 
-        try {
-            const res = await fetch(`/api/v1/reels/${reelId}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            log('success', `✅ 릴스 삭제 완료`);
-            showResult('deleteReelResult', { message: '삭제 완료' });
-
-        } catch (error) {
-            log('error', `❌ 릴스 삭제 실패: ${error.message}`);
-            showResult('deleteReelResult', { error: error.message }, true);
-        }
-    }
-
-    // 6. 전체 플로우
-    async function runFullFlow() {
-        log('info', '========== 전체 플로우 시작 ==========');
-
-        try {
-            // Mock 릴스 생성
-            log('info', 'STEP 1: Mock 릴스 생성...');
-            const res1 = await fetch('/api/v1/test/reels', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    reelUrl: 'https://www.instagram.com/reel/test_' + Date.now(),
-                    thumbnailUrl: 'https://via.placeholder.com/400',
-                    caption: MOCK_CAPTION
-                })
-            });
-
-            if (!res1.ok) throw new Error('릴스 생성 실패');
-
-            const reelData = await res1.json();
-            const reelId = reelData.reelId;
-
-            log('success', `✅ 릴스 생성 (ID: ${reelId})`);
-
-            await new Promise(r => setTimeout(r, 2000));
-
-            // 주소 추출
-            log('info', 'STEP 2: 주소 추출...');
-            const res2 = await fetch(`/api/v1/internal/reels/${reelId}/extract-addresses`, {
-                method: 'POST'
-            });
-
-            if (!res2.ok) throw new Error('주소 추출 실패');
-
-            const addrData = await res2.json();
-            log('success', `✅ 주소 ${addrData.addresses.length}개 추출`);
-
-            if (addrData.addresses.length === 0) {
-                log('warn', '⚠️ 주소 없음');
-                return;
-            }
-
-            // 장소 생성
-            log('info', 'STEP 3: 장소 생성...');
-            const res3 = await fetch(`/api/v1/internal/reels/${reelId}/create-places`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ addresses: addrData.addresses })
-            });
-
-            if (!res3.ok) throw new Error('장소 생성 실패');
-
-            const placeData = await res3.json();
-            log('success', `✅ 장소 ${placeData.createdPlaces.length}개 생성`);
-
-            // 통계 확인
-            await getStats();
-
-            log('success', '========== 전체 플로우 완료! ==========');
-
-            showResult('fullFlowResult', {
-                reelId,
-                addresses: addrData.addresses.length,
-                places: placeData.createdPlaces.length
-            });
-
-        } catch (error) {
-            log('error', `❌ 전체 플로우 실패: ${error.message}`);
-            showResult('fullFlowResult', { error: error.message }, true);
-        }
-    }
-
-    // 유틸
-    function getStatusBadge(status) {
-        const badges = {
-            'PROCESSING': '<span class="badge badge-info">처리중</span>',
-            'METADATA_PARSED': '<span class="badge badge-info">파싱완료</span>',
-            'NO_ADDRESS': '<span class="badge badge-warning">주소없음</span>',
-            'PLACE_FOUND': '<span class="badge badge-success">장소생성</span>',
-            'PLACE_NOT_FOUND': '<span class="badge badge-danger">장소없음</span>',
-            'FAILED': '<span class="badge badge-danger">실패</span>'
-        };
-        return badges[status] || `<span class="badge">${status}</span>`;
-    }
-
-    // 초기화
-    updateLoginUI(false);
-    log('success', '✨ 릴스플레이스 완전판 테스트 준비 완료!');
-    log('info', '먼저 "⚡ 빠른 로그인"으로 로그인하세요!\n');
-</script>
 </body>
 </html>

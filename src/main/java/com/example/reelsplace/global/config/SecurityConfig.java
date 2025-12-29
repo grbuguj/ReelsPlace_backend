@@ -36,6 +36,7 @@ public class SecurityConfig {
                 
                 // 요청 권한 설정
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()              // OAuth2 인증 (Spring 기본 경로)
                         .requestMatchers("/login/**").permitAll()             // 로그인 페이지
                         .requestMatchers("/api/v1/internal/**").permitAll()      // Internal API (TODO: 별도 인증 필요)

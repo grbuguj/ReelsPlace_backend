@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
     <title>ReelsPlace - Discover Places from Instagram Reels</title>
     <style>
         * {
@@ -67,11 +68,6 @@
             color: #666;
         }
 
-        .auth-status.logged-in {
-            background: #d4edda;
-            color: #155724;
-        }
-
         /* Container */
         .container {
             max-width: 1200px;
@@ -121,6 +117,79 @@
             font-size: 13px;
             color: #666;
             margin-top: 10px;
+        }
+
+        /* Try It Out Section */
+        .try-it-section {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .try-it-section h3 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .try-it-section > p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .url-input-wrapper {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .url-input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #f8f9fa;
+            color: #999;
+        }
+
+        .load-button {
+            padding: 15px 30px;
+            background: #ccc;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: not-allowed;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .lock-icon {
+            font-size: 16px;
+        }
+
+        .input-note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #856404;
+            line-height: 1.5;
         }
 
         /* How it Works */
@@ -197,7 +266,7 @@
         .demo-section h3 {
             font-size: 28px;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
 
         .demo-subtitle {
@@ -254,15 +323,18 @@
         }
 
         .location-item {
-            background: white;
+            background: #fffbf0;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 10px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #ffc107;
         }
 
-        .location-item:last-child {
-            margin-bottom: 0;
+        .mock-badge {
+            font-size: 11px;
+            color: #856404;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
 
         .location-name {
@@ -275,27 +347,6 @@
         .location-address {
             font-size: 14px;
             color: #666;
-        }
-
-        .loading-state {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        .loading-state .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
 
         /* Info Box */
@@ -320,7 +371,11 @@
             color: #004085;
             font-size: 14px;
             line-height: 1.6;
-            margin: 0;
+            margin: 0 0 10px 0;
+        }
+
+        .info-box p:last-child {
+            margin-bottom: 0;
         }
 
         .info-box ul {
@@ -331,6 +386,23 @@
 
         .info-box ul li {
             margin-bottom: 5px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+        }
+
+        .warning-box h4 {
+            color: #856404;
+        }
+
+        .warning-box p {
+            color: #856404;
+        }
+
+        .warning-box ul {
+            color: #856404;
         }
 
         /* Footer */
@@ -378,6 +450,14 @@
             .embed-container {
                 grid-template-columns: 1fr;
             }
+
+            .url-input-container {
+                flex-direction: column;
+            }
+
+            .load-button {
+                justify-content: center;
+            }
         }
 
         /* Success badge */
@@ -406,7 +486,7 @@
                 <p>Discover Places from Instagram Reels</p>
             </div>
         </div>
-        <div class="auth-status" id="authStatus">
+        <div class="auth-status">
             Demo Mode
         </div>
     </div>
@@ -427,6 +507,30 @@
         <div class="meta-badge">
             <span>📷</span>
             <span>Powered by Meta oEmbed API</span>
+        </div>
+    </div>
+
+    <!-- Try It Out Section -->
+    <div class="try-it-section">
+        <h3>Try It Out</h3>
+        <p>See how ReelsPlace will work with Instagram Reel URLs:</p>
+
+        <div class="url-input-wrapper">
+            <div class="url-input-container">
+                <input type="text"
+                       class="url-input"
+                       placeholder="https://www.instagram.com/reel/..."
+                       value="https://www.instagram.com/reel/DOTKY4YkbiX/"
+                       disabled>
+                <button class="load-button" disabled>
+                    Load Reel
+                    <span class="lock-icon">🔒</span>
+                </button>
+            </div>
+            <div class="input-note">
+                <strong>ℹ️ Demo Mode:</strong> URL input will be enabled after Meta oEmbed Read approval.
+                Currently showing a pre-loaded example Reel to demonstrate the integration.
+            </div>
         </div>
     </div>
 
@@ -471,6 +575,24 @@
     <!-- Demo Section -->
     <div class="demo-section">
         <h3>Live Demo</h3>
+
+        <!-- Demo Note - 맨 위로! -->
+        <div class="info-box warning-box" style="margin-bottom: 30px;">
+            <h4>⚠️ Important - Demo Note</h4>
+            <p>
+                <strong>This demo uses demonstration data because we don't have
+                    Meta oEmbed Read permission yet.</strong>
+            </p>
+            <p style="margin-top: 10px;">
+                After approval, our backend will automatically call Meta's oEmbed API
+                to fetch real caption text and extract actual location information.
+            </p>
+            <p style="margin-top: 10px; font-size: 13px;">
+                This follows Meta's official guidance for demonstrating features that
+                require API permissions during the review process.
+            </p>
+        </div>
+
         <p class="demo-subtitle">Below is a real Instagram Reel embedded using Instagram's embed widget, demonstrating our integration:</p>
 
         <div class="success-badge">
@@ -520,27 +642,27 @@
                             }
                         })();
                     </script>
-
-
                 </div>
             </div>
 
             <!-- Location Results -->
             <div class="location-results">
                 <h4>📍 Extracted Location Information</h4>
+
                 <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
-                    From the Reel caption, we extract place information:
+                    <strong>Example output</strong> (demonstration data):
                 </p>
 
                 <div class="location-item">
+                    <div class="mock-badge">⚠️ Mock Data - For Demonstration</div>
                     <div class="location-name">키자니아 서울</div>
                     <div class="location-address">서울 송파구 올림픽로 240 키자니아 서울</div>
                 </div>
 
                 <div style="margin-top: 20px; padding: 15px; background: white; border-radius: 8px; font-size: 13px; color: #666;">
-                    <strong style="color: #333;">How it works:</strong><br>
-                    1. Caption text is analyzed for Korean address patterns<br>
-                    2. Place names and addresses are extracted<br>
+                    <strong style="color: #333;">How it will work after approval:</strong><br>
+                    1. Caption text will be analyzed for Korean address patterns<br>
+                    2. Place names and addresses will be extracted<br>
                     3. Users can save these locations to their collection<br>
                     4. Locations can be opened in map applications
                 </div>
@@ -549,24 +671,54 @@
 
         <div class="info-box" style="margin-top: 30px;">
             <h4>🔧 Technical Implementation</h4>
-            <p style="margin-bottom: 10px;">Our production code calls Meta's oEmbed API:</p>
-            <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 12px; color: #333; margin: 10px 0;">
-fetch('https://graph.facebook.com/v22.0/instagram_oembed', {
-  method: 'GET',
-  params: {
-    url: reelUrl,
-    access_token: `${appId}|${appSecret}`
-  }
-}).then(response => {
-  // Display embed HTML with proper attribution
-  displayEmbed(response.html);
+            <p style="margin-bottom: 10px;">
+                Our production backend code (Java Spring Boot):
+            </p>
+            <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px;
+                overflow-x: auto; font-size: 11px; color: #333;
+                margin: 10px 0; font-family: 'Courier New', monospace;">
+@Service
+public class InstagramParsingService {
 
-  // Extract location from caption
-  extractLocation(response.caption);
-});</pre>
+    @Value("${instagram.app-id}")
+    private String appId;
+
+    @Value("${instagram.app-secret}")
+    private String appSecret;
+
+    public InstagramEmbedDto getOembedData(String reelUrl) {
+        String apiUrl = "https://graph.facebook.com/v22.0/instagram_oembed";
+        String accessToken = appId + "|" + appSecret;
+
+        RestTemplate restTemplate = new RestTemplate();
+        UriComponentsBuilder builder = UriComponentsBuilder
+            .fromHttpUrl(apiUrl)
+            .queryParam("url", reelUrl)
+            .queryParam("access_token", accessToken);
+
+        // Call oEmbed API
+        ResponseEntity<OEmbedResponse> response =
+            restTemplate.getForEntity(builder.toUriString(),
+                                     OEmbedResponse.class);
+
+        // Parse HTML to extract caption
+        String caption = extractCaptionFromHtml(
+            response.getBody().getHtml()
+        );
+
+        // Extract location from caption
+        LocationInfo location = parseLocation(caption);
+
+        return InstagramEmbedDto.builder()
+            .embedHtml(response.getBody().getHtml())
+            .location(location)
+            .build();
+    }
+}</pre>
             <p style="font-size: 13px; color: #666; margin-top: 10px;">
-                The demo above uses Instagram's public embed widget for demonstration purposes.
-                In production, we use Meta's oEmbed API endpoint after approval.
+                The demo above uses Instagram's public embed widget for
+                demonstration purposes. In production, our Java backend
+                calls Meta's oEmbed API endpoint after approval.
             </p>
         </div>
     </div>
